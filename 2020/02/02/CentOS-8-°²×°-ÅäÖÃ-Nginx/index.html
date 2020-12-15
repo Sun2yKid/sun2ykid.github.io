@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Trebuchet MS:300,300italic,400,400italic,700,700italic|0.9:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"sun2y.me","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="本想把域名解析到阿里ecs上，结果浏览器输入域名之后，提示需要备案…">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CentOS 8 安装 配置 Nginx">
+<meta property="og:url" content="http://sun2y.me/2020/02/02/CentOS-8-%C2%B0%C2%B2%C3%97%C2%B0-A%CC%8Aa%CC%88O%CC%88A%CC%83-Nginx/index.html">
+<meta property="og:site_name" content="妖小灰">
+<meta property="og:description" content="本想把域名解析到阿里ecs上，结果浏览器输入域名之后，提示需要备案…">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://sun2y.me/images/domain.jpg">
+<meta property="og:image" content="http://sun2y.me/images/aliyun.jpg">
+<meta property="article:published_time" content="2020-02-02T03:30:40.000Z">
+<meta property="article:modified_time" content="2020-02-03T14:35:02.000Z">
+<meta property="article:author" content="妖小灰">
+<meta property="article:tag" content="CentOS">
+<meta property="article:tag" content="Nginx">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://sun2y.me/images/domain.jpg">
+
+<link rel="canonical" href="http://sun2y.me/2020/02/02/CentOS-8-%C2%B0%C2%B2%C3%97%C2%B0-A%CC%8Aa%CC%88O%CC%88A%CC%83-Nginx/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>CentOS 8 安装 配置 Nginx | 妖小灰</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-124173268-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-124173268-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?a5f08efba4fa4000554315eb2383dab4";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">妖小灰</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Never too late to learn.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://sun2y.me/2020/02/02/CentOS-8-%C2%B0%C2%B2%C3%97%C2%B0-A%CC%8Aa%CC%88O%CC%88A%CC%83-Nginx/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="妖小灰">
+      <meta itemprop="description" content="(╯‵□′)╯︵┻━┻.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="妖小灰">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CentOS 8 安装 配置 Nginx
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-02-02 11:30:40" itemprop="dateCreated datePublished" datetime="2020-02-02T11:30:40+08:00">2020-02-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-02-03 22:35:02" itemprop="dateModified" datetime="2020-02-03T22:35:02+08:00">2020-02-03</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index"><span itemprop="name">技术</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本想把域名解析到阿里ecs上，结果浏览器输入域名之后，提示需要备案…</p>
+<a id="more"></a>
+
+<p><img src="/images/domain.jpg" alt="domain.jpg"></p>
+<p>嗯…好吧，我去备案还不行吗。而当我在阿里云上做备案准备时…</p>
+<p><img src="/images/aliyun.jpg" alt="aliyun.jpg"></p>
+<p>？？？ 域名无法备案，而不备案又不让解析到国内服务器，这就是传说中的死锁？</p>
+<p>无奈只好将域名解析到海外服务器，才有了这篇记录</p>
+<h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><p>OS: CentOS 8</p>
+<h2 id="找nginx安装包"><a href="#找nginx安装包" class="headerlink" title="找nginx安装包"></a>找nginx安装包</h2><blockquote>
+<p>sudo yum search nginx<br>sudo yum list nginx</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">[root@centos-8 ~]# sudo yum search nginx</span><br><span class="line">Last metadata expiration check: 0:42:37 ago on Sun 02 Feb 2020 02:30:34 AM UTC.</span><br><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; Name Exactly Matched: nginx &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br><span class="line">nginx.x86_64 : A high performance web server and reverse proxy server</span><br><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; Name &amp; Summary Matched: nginx &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br><span class="line">nginx-mod-mail.x86_64 : Nginx mail modules</span><br><span class="line">nginx-mod-stream.x86_64 : Nginx stream modules</span><br><span class="line">collectd-nginx.x86_64 : Nginx plugin for collectd</span><br><span class="line">nginx-mod-http-perl.x86_64 : Nginx HTTP perl module</span><br><span class="line">nginx-mod-http-xslt-filter.x86_64 : Nginx XSLT module</span><br><span class="line">nginx-mod-http-image-filter.x86_64 : Nginx HTTP image filter module</span><br><span class="line">nginx-filesystem.noarch : The basic directory layout for the Nginx server</span><br><span class="line">pcp-pmda-nginx.x86_64 : Performance Co-Pilot (PCP) metrics for the Nginx Webserver</span><br><span class="line">nginx-all-modules.noarch : A meta package that installs all available Nginx modules</span><br><span class="line">[root@centos-8 ~]# sudo yum list nginx</span><br><span class="line">Last metadata expiration check: 0:42:53 ago on Sun 02 Feb 2020 02:30:34 AM UTC.</span><br><span class="line">Available Packages</span><br><span class="line">nginx.x86_64                                                                  1:1.14.1-9.module_el8.0.0+184+e34fea82                                                                  AppStream</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>获取要安装的nginx的版本信息</p>
+<blockquote>
+<p>sudo yum info nginx</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">[root@centos-8 ~]# sudo yum info nginx</span><br><span class="line">Last metadata expiration check: 0:43:14 ago on Sun 02 Feb 2020 02:30:34 AM UTC.</span><br><span class="line">Available Packages</span><br><span class="line">Name         : nginx</span><br><span class="line">Epoch        : 1</span><br><span class="line">Version      : 1.14.1</span><br><span class="line">Release      : 9.module_el8.0.0+184+e34fea82</span><br><span class="line">Arch         : x86_64</span><br><span class="line">Size         : 570 k</span><br><span class="line">Source       : nginx-1.14.1-9.module_el8.0.0+184+e34fea82.src.rpm</span><br><span class="line">Repo         : AppStream</span><br><span class="line">Summary      : A high performance web server and reverse proxy server</span><br><span class="line">URL          : http:&#x2F;&#x2F;nginx.org&#x2F;</span><br><span class="line">License      : BSD</span><br><span class="line">Description  : Nginx is a web server and a reverse proxy server for HTTP, SMTP, POP3 and</span><br><span class="line">             : IMAP protocols, with a strong focus on high concurrency, performance and low</span><br><span class="line">             : memory usage.</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="安装Nginx"><a href="#安装Nginx" class="headerlink" title="安装Nginx"></a>安装Nginx</h2><blockquote>
+<p>sudo yum install nginx</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">[root@centos-8 ~]# sudo yum install nginx</span><br><span class="line">Last metadata expiration check: 0:46:56 ago on Sun 02 Feb 2020 02:30:34 AM UTC.</span><br><span class="line">Dependencies resolved.</span><br><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br><span class="line"> Package                                              Arch                            Version                                                         Repository                          Size</span><br><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br><span class="line">Installing:</span><br><span class="line"> nginx                                                x86_64                          1:1.14.1-9.module_el8.0.0+184+e34fea82                          AppStream                          570 k</span><br><span class="line">Installing dependencies:</span><br><span class="line"> gd                                                   x86_64                          2.2.5-6.el8                                                     AppStream                          144 k</span><br><span class="line"> jbigkit-libs                                         x86_64                          2.1-14.el8                                                      AppStream                           55 k</span><br><span class="line"> libXpm                                               x86_64                          3.5.12-7.el8                                                    AppStream                           58 k</span><br><span class="line"> libjpeg-turbo                                        x86_64                          1.5.3-10.el8                                                    AppStream                          156 k</span><br><span class="line"> libtiff                                              x86_64                          4.0.9-15.el8                                                    AppStream                          188 k</span><br><span class="line"> libwebp                                              x86_64                          1.0.0-1.el8                                                     AppStream                          273 k</span><br><span class="line"> nginx-all-modules                                    noarch                          1:1.14.1-9.module_el8.0.0+184+e34fea82                          AppStream                           23 k</span><br><span class="line"> nginx-filesystem                                     noarch                          1:1.14.1-9.module_el8.0.0+184+e34fea82                          AppStream                           24 k</span><br><span class="line"> nginx-mod-http-image-filter                          x86_64                          1:1.14.1-9.module_el8.0.0+184+e34fea82                          AppStream                           35 k</span><br><span class="line"> nginx-mod-http-perl                                  x86_64                          1:1.14.1-9.module_el8.0.0+184+e34fea82                          AppStream                           45 k</span><br><span class="line"> nginx-mod-http-xslt-filter                           x86_64                          1:1.14.1-9.module_el8.0.0+184+e34fea82                          AppStream                           33 k</span><br><span class="line"> nginx-mod-mail                                       x86_64                          1:1.14.1-9.module_el8.0.0+184+e34fea82                          AppStream                           64 k</span><br><span class="line"> nginx-mod-stream                                     x86_64                          1:1.14.1-9.module_el8.0.0+184+e34fea82                          AppStream                           85 k</span><br><span class="line"> libxslt                                              x86_64                          1.1.32-3.el8                                                    BaseOS                             249 k</span><br><span class="line"> perl-Carp                                            noarch                          1.42-396.el8                                                    BaseOS                              30 k</span><br><span class="line"> perl-Errno                                           x86_64                          1.28-416.el8                                                    BaseOS                              76 k</span><br><span class="line"> perl-Exporter                                        noarch                          5.72-396.el8                                                    BaseOS                              34 k</span><br><span class="line"> perl-File-Path                                       noarch                          2.15-2.el8                                                      BaseOS                              38 k</span><br><span class="line"> perl-IO                                              x86_64                          1.38-416.el8                                                    BaseOS                             141 k</span><br><span class="line"> perl-PathTools                                       x86_64                          3.74-1.el8                                                      BaseOS                              90 k</span><br><span class="line"> perl-Scalar-List-Utils                               x86_64                          3:1.49-2.el8                                                    BaseOS                              68 k</span><br><span class="line"> perl-Socket                                          x86_64                          4:2.027-3.el8                                                   BaseOS                              59 k</span><br><span class="line"> perl-Text-Tabs+Wrap                                  noarch                          2013.0523-395.el8                                               BaseOS                              24 k</span><br><span class="line"> perl-Unicode-Normalize                               x86_64                          1.25-396.el8                                                    BaseOS                              82 k</span><br><span class="line"> perl-constant                                        noarch                          1.33-396.el8                                                    BaseOS                              25 k</span><br><span class="line"> perl-interpreter                                     x86_64                          4:5.26.3-416.el8                                                BaseOS                             6.3 M</span><br><span class="line"> perl-libs                                            x86_64                          4:5.26.3-416.el8                                                BaseOS                             1.6 M</span><br><span class="line"> perl-macros                                          x86_64                          4:5.26.3-416.el8                                                BaseOS                              72 k</span><br><span class="line"> perl-parent                                          noarch                          1:0.237-1.el8                                                   BaseOS                              20 k</span><br><span class="line"> perl-threads                                         x86_64                          1:2.21-2.el8                                                    BaseOS                              61 k</span><br><span class="line"> perl-threads-shared                                  x86_64                          1.58-2.el8                                                      BaseOS                              48 k</span><br><span class="line">Enabling module streams:</span><br><span class="line"> nginx                                                                                1.14                                                                                                    </span><br><span class="line"></span><br><span class="line">Transaction Summary</span><br><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br><span class="line">Install  32 Packages</span><br><span class="line"></span><br><span class="line">Total download size: 11 M</span><br><span class="line">Installed size: 27 M</span><br><span class="line">Is this ok [y&#x2F;N]: y</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>输入y，确认下载安装</p>
+<h2 id="启动Nginx"><a href="#启动Nginx" class="headerlink" title="启动Nginx"></a>启动Nginx</h2><p>允许<code>开机启动</code></p>
+<blockquote>
+<p>sudo systemctl enable nginx</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@centos-8 ~]# sudo systemctl enable nginx</span><br><span class="line">Created symlink &#x2F;etc&#x2F;systemd&#x2F;system&#x2F;multi-user.target.wants&#x2F;nginx.service → &#x2F;usr&#x2F;lib&#x2F;systemd&#x2F;system&#x2F;nginx.service.</span><br></pre></td></tr></table></figure>
+<p>启动nginx服务</p>
+<blockquote>
+<p>sudo systemctl start nginx</p>
+</blockquote>
+<p>常用<code>启动/停止/重启/重载/状态</code>命令</p>
+<blockquote>
+<p>sudo systemctl start/stop/restart/reload/status nginx</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[root@centos-8 ~]# sudo systemctl status nginx</span><br><span class="line">● nginx.service - The nginx HTTP and reverse proxy server</span><br><span class="line">   Loaded: loaded (&#x2F;usr&#x2F;lib&#x2F;systemd&#x2F;system&#x2F;nginx.service; enabled; vendor preset: disabled)</span><br><span class="line">   Active: active (running) since Sun 2020-02-02 03:18:23 UTC; 25min ago</span><br><span class="line">  Process: 9466 ExecStart&#x3D;&#x2F;usr&#x2F;sbin&#x2F;nginx (code&#x3D;exited, status&#x3D;0&#x2F;SUCCESS)</span><br><span class="line">  Process: 9464 ExecStartPre&#x3D;&#x2F;usr&#x2F;sbin&#x2F;nginx -t (code&#x3D;exited, status&#x3D;0&#x2F;SUCCESS)</span><br><span class="line">  Process: 9463 ExecStartPre&#x3D;&#x2F;usr&#x2F;bin&#x2F;rm -f &#x2F;run&#x2F;nginx.pid (code&#x3D;exited, status&#x3D;0&#x2F;SUCCESS)</span><br><span class="line"> Main PID: 9468 (nginx)</span><br><span class="line">    Tasks: 2 (limit: 5092)</span><br><span class="line">   Memory: 6.9M</span><br><span class="line">   CGroup: &#x2F;system.slice&#x2F;nginx.service</span><br><span class="line">           ├─9468 nginx: master process &#x2F;usr&#x2F;sbin&#x2F;nginx</span><br><span class="line">           └─9469 nginx: worker process</span><br><span class="line"></span><br><span class="line">Feb 02 03:18:23 centos-8 systemd[1]: Starting The nginx HTTP and reverse proxy server...</span><br><span class="line">Feb 02 03:18:23 centos-8 nginx[9464]: nginx: the configuration file &#x2F;etc&#x2F;nginx&#x2F;nginx.conf syntax is ok</span><br><span class="line">Feb 02 03:18:23 centos-8 nginx[9464]: nginx: configuration file &#x2F;etc&#x2F;nginx&#x2F;nginx.conf test is successful</span><br><span class="line">Feb 02 03:18:23 centos-8 systemd[1]: nginx.service: Failed to parse PID from file &#x2F;run&#x2F;nginx.pid: Invalid argument</span><br><span class="line">Feb 02 03:18:23 centos-8 systemd[1]: Started The nginx HTTP and reverse proxy server.</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="使用firewall-cmd打开80，443端口"><a href="#使用firewall-cmd打开80，443端口" class="headerlink" title="使用firewall-cmd打开80，443端口"></a>使用firewall-cmd打开80，443端口</h2><blockquote>
+<p>sudo firewall-cmd –permanent –zone=public –add-service=http –add-service=https<br>sudo firewall-cmd –reload<br>sudo firewall-cmd –list-services –zone=public</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@centos-8 ~]# sudo firewall-cmd --permanent --zone&#x3D;public --add-service&#x3D;http --add-service&#x3D;https</span><br><span class="line">success</span><br><span class="line">[root@centos-8 ~]# sudo firewall-cmd --reload</span><br><span class="line">success</span><br><span class="line">[root@centos-8 ~]# sudo firewall-cmd --list-services --zone&#x3D;public</span><br><span class="line">cockpit dhcpv6-client http https ssh</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>测试</p>
+<blockquote>
+<p>sudo ss -tulpn</p>
+</blockquote>
+<blockquote>
+<p>ip a</p>
+</blockquote>
+<blockquote>
+<p>curl -I <a target="_blank" rel="noopener" href="http://xx.xx.xx.xx/">http://xx.xx.xx.xx</a><br>curl <a target="_blank" rel="noopener" href="http://xx.xx.xx.xx/">http://xx.xx.xx.xx</a></p>
+</blockquote>
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>CentOS 8 Nginx 配置文件目录 – /etc/nginx/<br>Nginx全局配置文件 – /etc/nginx/nginx.conf<br>TCP ports opened by Nginx – 80 (HTTP), 443 (HTTPS)<br>Nginx文件根目录 – /usr/share/nginx/html</p>
+<blockquote>
+<p>sudo vi /etc/nginx/nginx.conf</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></td><td class="code"><pre><span class="line">[root@centos-8 ~]# sudo cat &#x2F;etc&#x2F;nginx&#x2F;nginx.conf</span><br><span class="line"># For more information on configuration, see:</span><br><span class="line">#   * Official English Documentation: http:&#x2F;&#x2F;nginx.org&#x2F;en&#x2F;docs&#x2F;</span><br><span class="line">#   * Official Russian Documentation: http:&#x2F;&#x2F;nginx.org&#x2F;ru&#x2F;docs&#x2F;</span><br><span class="line"></span><br><span class="line">user nginx;</span><br><span class="line">worker_processes auto;</span><br><span class="line">error_log &#x2F;var&#x2F;log&#x2F;nginx&#x2F;error.log;</span><br><span class="line">pid &#x2F;run&#x2F;nginx.pid;</span><br><span class="line"></span><br><span class="line"># Load dynamic modules. See &#x2F;usr&#x2F;share&#x2F;doc&#x2F;nginx&#x2F;README.dynamic.</span><br><span class="line">include &#x2F;usr&#x2F;share&#x2F;nginx&#x2F;modules&#x2F;*.conf;</span><br><span class="line"></span><br><span class="line">events &#123;</span><br><span class="line">    worker_connections 1024;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">http &#123;</span><br><span class="line">    log_format  main  &#39;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &#39;</span><br><span class="line">                      &#39;$status $body_bytes_sent &quot;$http_referer&quot; &#39;</span><br><span class="line">                      &#39;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&#39;;</span><br><span class="line"></span><br><span class="line">    access_log  &#x2F;var&#x2F;log&#x2F;nginx&#x2F;access.log  main;</span><br><span class="line"></span><br><span class="line">    sendfile            on;</span><br><span class="line">    tcp_nopush          on;</span><br><span class="line">    tcp_nodelay         on;</span><br><span class="line">    keepalive_timeout   65;</span><br><span class="line">    types_hash_max_size 2048;</span><br><span class="line"></span><br><span class="line">    include             &#x2F;etc&#x2F;nginx&#x2F;mime.types;</span><br><span class="line">    default_type        application&#x2F;octet-stream;</span><br><span class="line"></span><br><span class="line">    # Load modular configuration files from the &#x2F;etc&#x2F;nginx&#x2F;conf.d directory.</span><br><span class="line">    # See http:&#x2F;&#x2F;nginx.org&#x2F;en&#x2F;docs&#x2F;ngx_core_module.html#include</span><br><span class="line">    # for more information.</span><br><span class="line">    include &#x2F;etc&#x2F;nginx&#x2F;conf.d&#x2F;*.conf;</span><br><span class="line"></span><br><span class="line">    server &#123;</span><br><span class="line">        listen       80 default_server;</span><br><span class="line">        listen       [::]:80 default_server;</span><br><span class="line">        server_name  _;</span><br><span class="line">        root         &#x2F;usr&#x2F;share&#x2F;nginx&#x2F;html;</span><br><span class="line"></span><br><span class="line">        # Load configuration files for the default server block.</span><br><span class="line">        include &#x2F;etc&#x2F;nginx&#x2F;default.d&#x2F;*.conf;</span><br><span class="line"></span><br><span class="line">        location &#x2F; &#123;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        error_page 404 &#x2F;404.html;</span><br><span class="line">            location &#x3D; &#x2F;40x.html &#123;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        error_page 500 502 503 504 &#x2F;50x.html;</span><br><span class="line">            location &#x3D; &#x2F;50x.html &#123;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"># Settings for a TLS enabled server.</span><br><span class="line">#</span><br><span class="line">#    server &#123;</span><br><span class="line">#        listen       443 ssl http2 default_server;</span><br><span class="line">#        listen       [::]:443 ssl http2 default_server;</span><br><span class="line">#        server_name  _;</span><br><span class="line">#        root         &#x2F;usr&#x2F;share&#x2F;nginx&#x2F;html;</span><br><span class="line">#</span><br><span class="line">#        ssl_certificate &quot;&#x2F;etc&#x2F;pki&#x2F;nginx&#x2F;server.crt&quot;;</span><br><span class="line">#        ssl_certificate_key &quot;&#x2F;etc&#x2F;pki&#x2F;nginx&#x2F;private&#x2F;server.key&quot;;</span><br><span class="line">#        ssl_session_cache shared:SSL:1m;</span><br><span class="line">#        ssl_session_timeout  10m;</span><br><span class="line">#        ssl_ciphers PROFILE&#x3D;SYSTEM;</span><br><span class="line">#        ssl_prefer_server_ciphers on;</span><br><span class="line">#</span><br><span class="line">#        # Load configuration files for the default server block.</span><br><span class="line">#        include &#x2F;etc&#x2F;nginx&#x2F;default.d&#x2F;*.conf;</span><br><span class="line">#</span><br><span class="line">#        location &#x2F; &#123;</span><br><span class="line">#        &#125;</span><br><span class="line">#</span><br><span class="line">#        error_page 404 &#x2F;404.html;</span><br><span class="line">#            location &#x3D; &#x2F;40x.html &#123;</span><br><span class="line">#        &#125;</span><br><span class="line">#</span><br><span class="line">#        error_page 500 502 503 504 &#x2F;50x.html;</span><br><span class="line">#            location &#x3D; &#x2F;50x.html &#123;</span><br><span class="line">#        &#125;</span><br><span class="line">#    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>可以上传html/css/js和图像文件到/usr/share/nginx/html/<br>编写自定义的配置文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br></pre></td><td class="code"><pre><span class="line">[root@centos-8 ~]# sudo cat &#x2F;etc&#x2F;nginx&#x2F;nginx.conf.default </span><br><span class="line"></span><br><span class="line">#user  nobody;</span><br><span class="line">worker_processes  1;</span><br><span class="line"></span><br><span class="line">#error_log  logs&#x2F;error.log;</span><br><span class="line">#error_log  logs&#x2F;error.log  notice;</span><br><span class="line">#error_log  logs&#x2F;error.log  info;</span><br><span class="line"></span><br><span class="line">#pid        logs&#x2F;nginx.pid;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">events &#123;</span><br><span class="line">    worker_connections  1024;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">http &#123;</span><br><span class="line">    include       mime.types;</span><br><span class="line">    default_type  application&#x2F;octet-stream;</span><br><span class="line"></span><br><span class="line">    #log_format  main  &#39;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &#39;</span><br><span class="line">    #                  &#39;$status $body_bytes_sent &quot;$http_referer&quot; &#39;</span><br><span class="line">    #                  &#39;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&#39;;</span><br><span class="line"></span><br><span class="line">    #access_log  logs&#x2F;access.log  main;</span><br><span class="line"></span><br><span class="line">    sendfile        on;</span><br><span class="line">    #tcp_nopush     on;</span><br><span class="line"></span><br><span class="line">    #keepalive_timeout  0;</span><br><span class="line">    keepalive_timeout  65;</span><br><span class="line"></span><br><span class="line">    #gzip  on;</span><br><span class="line"></span><br><span class="line">    server &#123;</span><br><span class="line">        listen       80;</span><br><span class="line">        server_name  localhost;</span><br><span class="line"></span><br><span class="line">        #charset koi8-r;</span><br><span class="line"></span><br><span class="line">        #access_log  logs&#x2F;host.access.log  main;</span><br><span class="line"></span><br><span class="line">        location &#x2F; &#123;</span><br><span class="line">            root   html;</span><br><span class="line">            index  index.html index.htm;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        #error_page  404              &#x2F;404.html;</span><br><span class="line"></span><br><span class="line">        # redirect server error pages to the static page &#x2F;50x.html</span><br><span class="line">        #</span><br><span class="line">        error_page   500 502 503 504  &#x2F;50x.html;</span><br><span class="line">        location &#x3D; &#x2F;50x.html &#123;</span><br><span class="line">            root   html;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        # proxy the PHP scripts to Apache listening on 127.0.0.1:80</span><br><span class="line">        #</span><br><span class="line">        #location ~ \.php$ &#123;</span><br><span class="line">        #    proxy_pass   http:&#x2F;&#x2F;127.0.0.1;</span><br><span class="line">        #&#125;</span><br><span class="line"></span><br><span class="line">        # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000</span><br><span class="line">        #</span><br><span class="line">        #location ~ \.php$ &#123;</span><br><span class="line">        #    root           html;</span><br><span class="line">        #    fastcgi_pass   127.0.0.1:9000;</span><br><span class="line">        #    fastcgi_index  index.php;</span><br><span class="line">        #    fastcgi_param  SCRIPT_FILENAME  &#x2F;scripts$fastcgi_script_name;</span><br><span class="line">        #    include        fastcgi_params;</span><br><span class="line">        #&#125;</span><br><span class="line"></span><br><span class="line">        # deny access to .htaccess files, if Apache&#39;s document root</span><br><span class="line">        # concurs with nginx&#39;s one</span><br><span class="line">        #</span><br><span class="line">        #location ~ &#x2F;\.ht &#123;</span><br><span class="line">        #    deny  all;</span><br><span class="line">        #&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    # another virtual host using mix of IP-, name-, and port-based configuration</span><br><span class="line">    #</span><br><span class="line">    #server &#123;</span><br><span class="line">    #    listen       8000;</span><br><span class="line">    #    listen       somename:8080;</span><br><span class="line">    #    server_name  somename  alias  another.alias;</span><br><span class="line"></span><br><span class="line">    #    location &#x2F; &#123;</span><br><span class="line">    #        root   html;</span><br><span class="line">    #        index  index.html index.htm;</span><br><span class="line">    #    &#125;</span><br><span class="line">    #&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    # HTTPS server</span><br><span class="line">    #</span><br><span class="line">    #server &#123;</span><br><span class="line">    #    listen       443 ssl;</span><br><span class="line">    #    server_name  localhost;</span><br><span class="line"></span><br><span class="line">    #    ssl_certificate      cert.pem;</span><br><span class="line">    #    ssl_certificate_key  cert.key;</span><br><span class="line"></span><br><span class="line">    #    ssl_session_cache    shared:SSL:1m;</span><br><span class="line">    #    ssl_session_timeout  5m;</span><br><span class="line"></span><br><span class="line">    #    ssl_ciphers  HIGH:!aNULL:!MD5;</span><br><span class="line">    #    ssl_prefer_server_ciphers  on;</span><br><span class="line"></span><br><span class="line">    #    location &#x2F; &#123;</span><br><span class="line">    #        root   html;</span><br><span class="line">    #        index  index.html index.htm;</span><br><span class="line">    #    &#125;</span><br><span class="line">    #&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://www.cyberciti.biz/faq/how-to-install-and-use-nginx-on-centos-8/">How to install and use Nginx on CentOS 8</a></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>Coffee? ☕</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/uploads/wechat-reward-image.png" alt="妖小灰 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/uploads/alipay-reward-image.png" alt="妖小灰 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/CentOS/" rel="tag"><i class="fa fa-tag"></i> CentOS</a>
+              <a href="/tags/Nginx/" rel="tag"><i class="fa fa-tag"></i> Nginx</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/01/31/%C2%BBu%CC%81%C3%86%C3%B7N%CC%83%C2%A7I%CC%88%C2%B0-Andrew-Ng%C2%A1%C2%B6Machine-Learning%C2%A1%C2%B7%C2%BFI%CC%82%C2%B3I%CC%80%C2%B1E%CC%82%C2%BCC%CC%A72/" rel="prev" title="机器学习 Andrew Ng《Machine Learning》课程笔记2">
+      <i class="fa fa-chevron-left"></i> 机器学习 Andrew Ng《Machine Learning》课程笔记2
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/02/03/%C2%BBu%CC%81%C3%86%C3%B7N%CC%83%C2%A7I%CC%88%C2%B0-Andrew-Ng%C2%A1%C2%B6Machine-Learning%C2%A1%C2%B7%C2%B5U%CC%812O%CC%88U%CC%88-%C2%B1a%CC%80%C2%B3I%CC%80%C3%97%C3%B7O%CC%80%C2%B5/" rel="next" title="机器学习 Andrew Ng《Machine Learning》第2周 编程作业">
+      机器学习 Andrew Ng《Machine Learning》第2周 编程作业 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8zMTk1MS84NTE1"></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83"><span class="nav-number">1.</span> <span class="nav-text">环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%BEnginx%E5%AE%89%E8%A3%85%E5%8C%85"><span class="nav-number">2.</span> <span class="nav-text">找nginx安装包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Nginx"><span class="nav-number">3.</span> <span class="nav-text">安装Nginx</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8Nginx"><span class="nav-number">4.</span> <span class="nav-text">启动Nginx</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8firewall-cmd%E6%89%93%E5%BC%8080%EF%BC%8C443%E7%AB%AF%E5%8F%A3"><span class="nav-number">5.</span> <span class="nav-text">使用firewall-cmd打开80，443端口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE"><span class="nav-number">6.</span> <span class="nav-text">配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="妖小灰"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">妖小灰</p>
+  <div class="site-description" itemprop="description">(╯‵□′)╯︵┻━┻.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">38</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">44</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Sun2yKid/" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Sun2yKid&#x2F;" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.facebook.com/zhonghua00700/" title="Facebook → https:&#x2F;&#x2F;www.facebook.com&#x2F;zhonghua00700&#x2F;" rel="noopener" target="_blank"><i class="fab fa-facebook fa-fw"></i>Facebook</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/1751826157/" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1751826157&#x2F;" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://zhonghua00700.lofter.com/" title="Lofter → http:&#x2F;&#x2F;zhonghua00700.lofter.com&#x2F;" rel="noopener" target="_blank"><i class="fab fa-camera fa-fw"></i>Lofter</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://docs.sun2y.me/" title="https:&#x2F;&#x2F;docs.sun2y.me&#x2F;" rel="noopener" target="_blank">Reading Notes</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.jianshu.com/u/0c026eae82a2" title="https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;0c026eae82a2" rel="noopener" target="_blank">Jianshu</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://ncov.sun2y.me/" title="http:&#x2F;&#x2F;ncov.sun2y.me&#x2F;" rel="noopener" target="_blank">2019nCoV</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">妖小灰</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

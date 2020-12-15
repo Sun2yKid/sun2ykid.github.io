@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Trebuchet MS:300,300italic,400,400italic,700,700italic|0.9:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"sun2y.me","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Go 官方教程：A Tour of Go">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go Tutorial">
+<meta property="og:url" content="http://sun2y.me/2020/03/19/GO%20tutorial/index.html">
+<meta property="og:site_name" content="妖小灰">
+<meta property="og:description" content="Go 官方教程：A Tour of Go">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-03-19T12:15:52.000Z">
+<meta property="article:modified_time" content="2020-03-21T23:23:04.000Z">
+<meta property="article:author" content="妖小灰">
+<meta property="article:tag" content="Go">
+<meta property="article:tag" content="tutorial">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://sun2y.me/2020/03/19/GO%20tutorial/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Go Tutorial | 妖小灰</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-124173268-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-124173268-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?a5f08efba4fa4000554315eb2383dab4";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">妖小灰</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Never too late to learn.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://sun2y.me/2020/03/19/GO%20tutorial/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="妖小灰">
+      <meta itemprop="description" content="(╯‵□′)╯︵┻━┻.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="妖小灰">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Go Tutorial
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-03-19 20:15:52" itemprop="dateCreated datePublished" datetime="2020-03-19T20:15:52+08:00">2020-03-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-03-22 07:23:04" itemprop="dateModified" datetime="2020-03-22T07:23:04+08:00">2020-03-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index"><span itemprop="name">技术</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Go 官方教程：<br><a target="_blank" rel="noopener" href="https://tour.golang.org/list">A Tour of Go</a></p>
+<a id="more"></a>
+
+<h2 id="Basic"><a href="#Basic" class="headerlink" title="Basic"></a>Basic</h2><h3 id="包"><a href="#包" class="headerlink" title="包"></a>包</h3><p>每个 Go 程序都是由包构成的。程序从 main 包开始运行。</p>
+<h3 id="导入"><a href="#导入" class="headerlink" title="导入"></a>导入</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">import (</span><br><span class="line">	&quot;fmt&quot;</span><br><span class="line">	&quot;math&quot;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h3 id="导出名"><a href="#导出名" class="headerlink" title="导出名"></a>导出名</h3><p>在 Go 中，如果一个名字以大写字母开头，那么它就是已导出的。  在导入一个包时，你只能引用其中已导出的名字。任何“未导出”的名字在该包外均无法访问。</p>
+<h3 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h3><p>函数可以没有参数或接受多个参数。</p>
+<p>注意类型在变量名 之后。<br>当连续两个或多个函数的已命名形参类型相同时，除最后一个类型以外，其它都可以省略。</p>
+<p>x int, y int 可缩写为x, y int</p>
+<h3 id="多值返回"><a href="#多值返回" class="headerlink" title="多值返回"></a>多值返回</h3><p>函数可以返回任意数量的返回值。</p>
+<h3 id="命名返回值"><a href="#命名返回值" class="headerlink" title="命名返回值"></a>命名返回值</h3><p>Go 的返回值可被命名，它们会被视作定义在函数顶部的变量。</p>
+<p>返回值的名称应当具有一定的意义，它可以作为文档使用。</p>
+<p>没有参数的 return 语句返回已命名的返回值。也就是 直接 返回。</p>
+<p>直接返回语句应当仅用在下面这样的短函数中。在长的函数中它们会影响代码的可读性。</p>
+<h3 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h3><p>var 语句用于声明一个变量列表，跟函数的参数列表一样，类型在最后。</p>
+<p>就像在这个例子中看到的一样，var 语句可以出现在包或函数级别。</p>
+<h3 id="变量的初始化"><a href="#变量的初始化" class="headerlink" title="变量的初始化"></a>变量的初始化</h3><p>变量声明可以包含初始值，每个变量对应一个。</p>
+<p>如果初始化值已存在，则可以省略类型；变量会从初始值中获得类型。</p>
+<h3 id="短变量声明"><a href="#短变量声明" class="headerlink" title="短变量声明"></a>短变量声明</h3><p>在函数中，简洁赋值语句 := 可在类型明确的地方代替 var 声明。</p>
+<p>函数外的每个语句都必须以关键字开始（var, func 等等），因此 := 结构不能在函数外使用。</p>
+<h3 id="基本类型"><a href="#基本类型" class="headerlink" title="基本类型"></a>基本类型</h3><p>Go 的基本类型有</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">bool</span><br><span class="line"></span><br><span class="line">string</span><br><span class="line"></span><br><span class="line">int  int8  int16  int32  int64</span><br><span class="line">uint uint8 uint16 uint32 uint64 uintptr</span><br><span class="line"></span><br><span class="line">byte &#x2F;&#x2F; uint8 的别名</span><br><span class="line"></span><br><span class="line">rune &#x2F;&#x2F; int32 的别名</span><br><span class="line">    &#x2F;&#x2F; 表示一个 Unicode 码点</span><br><span class="line"></span><br><span class="line">float32 float64</span><br><span class="line"></span><br><span class="line">complex64 complex128</span><br></pre></td></tr></table></figure>
+<p>int, uint 和 uintptr 在 32 位系统上通常为 32 位宽，在 64 位系统上则为 64 位宽。 当你需要一个整数值时应使用 int 类型，除非你有特殊的理由使用固定大小或无符号的整数类型。</p>
+<h3 id="零值"><a href="#零值" class="headerlink" title="零值"></a>零值</h3><p>没有明确初始值的变量声明会被赋予它们的 零值。</p>
+<p>零值是：</p>
+<p>数值类型为 0，<br>布尔类型为 false，<br>字符串为 “”（空字符串）。</p>
+<h3 id="类型转换"><a href="#类型转换" class="headerlink" title="类型转换"></a>类型转换</h3><p>表达式 T(v) 将值 v 转换为类型 T。</p>
+<p>一些关于数值的转换：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">var i int &#x3D; 42</span><br><span class="line">var f float64 &#x3D; float64(i)</span><br><span class="line">var u uint &#x3D; uint(f)</span><br></pre></td></tr></table></figure>
+<p>或者，更加简单的形式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">i :&#x3D; 42</span><br><span class="line">f :&#x3D; float64(i)</span><br><span class="line">u :&#x3D; uint(f)</span><br></pre></td></tr></table></figure>
+<p>与 C 不同的是，Go 在不同类型的项之间赋值时需要显式转换。</p>
+<h3 id="类型推导"><a href="#类型推导" class="headerlink" title="类型推导"></a>类型推导</h3><p>在声明一个变量而不指定其类型时（即使用不带类型的 := 语法或 var = 表达式语法），变量的类型由右值推导得出。</p>
+<p>当右值声明了类型时，新变量的类型与其相同</p>
+<h3 id="常量"><a href="#常量" class="headerlink" title="常量"></a>常量</h3><p>常量的声明与变量类似，只不过是使用 const 关键字。</p>
+<p>常量可以是字符、字符串、布尔值或数值。</p>
+<p>常量不能用 := 语法声明。</p>
+<h3 id="数值常量"><a href="#数值常量" class="headerlink" title="数值常量"></a>数值常量</h3><p>数值常量是高精度的 值。</p>
+<p>一个未指定类型的常量由上下文来决定其类型。</p>
+<h3 id="流程控制语句"><a href="#流程控制语句" class="headerlink" title="流程控制语句"></a>流程控制语句</h3><h4 id="for"><a href="#for" class="headerlink" title="for"></a>for</h4><p>Go 只有一种循环结构：for 循环。</p>
+<p>基本的 for 循环由三部分组成，它们用分号隔开：</p>
+<p>初始化语句：在第一次迭代前执行<br>条件表达式：在每次迭代前求值<br>后置语句：在每次迭代的结尾执行<br>初始化语句通常为一句短变量声明，该变量声明仅在 for 语句的作用域中可见。</p>
+<p>一旦条件表达式的布尔值为 false，循环迭代就会终止。</p>
+<p>注意：和 C、Java、JavaScript 之类的语言不同，Go 的 for 语句后面的三个构成部分外没有小括号， 大括号 { } 则是必须的。</p>
+<p>初始化语句和后置语句是可选的。</p>
+<p>for 是 Go 中的 “while”<br>此时你可以去掉分号，因为 C 的 while 在 Go 中叫做 for。</p>
+<h4 id="无限循环"><a href="#无限循环" class="headerlink" title="无限循环"></a>无限循环</h4><p>如果省略循环条件，该循环就不会结束，因此无限循环可以写得很紧凑。</p>
+<h4 id="if"><a href="#if" class="headerlink" title="if"></a>if</h4><p>Go 的 if 语句与 for 循环类似，表达式外无需小括号 ( ) ，而大括号 { } 则是必须的。<br>if 的简短语句<br>同 for 一样， if 语句可以在条件表达式前执行一个简单的语句。</p>
+<p>该语句声明的变量作用域仅在 if 之内。</p>
+<p>在 if 的简短语句中声明的变量同样可以在任何对应的 else 块中使用。</p>
+<h4 id="练习：循环与函数"><a href="#练习：循环与函数" class="headerlink" title="练习：循环与函数"></a>练习：循环与函数</h4><p>为了练习函数与循环，我们来实现一个平方根函数：用牛顿法实现平方根函数。</p>
+<p>计算机通常使用循环来计算 x 的平方根。从某个猜测的值 z 开始，我们可以根据 z² 与 x 的近似度来调整 z，产生一个更好的猜测：</p>
+<p>z -= (z<em>z - x) / (2</em>z)<br>重复调整的过程，猜测的结果会越来越精确，得到的答案也会尽可能接近实际的平方根。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">	&quot;fmt&quot;</span><br><span class="line">	&quot;math&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func Sqrt(x float64) float64 &#123;</span><br><span class="line">	z :&#x3D; 1.0</span><br><span class="line">	for i :&#x3D; 1; i &lt;&#x3D; 10; i++ &#123;</span><br><span class="line">		z -&#x3D; (z*z - x) &#x2F; (2 * z)</span><br><span class="line">		&#x2F;&#x2F; fmt.Println(i, z)</span><br><span class="line">	&#125;</span><br><span class="line">	return z</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	fmt.Println(Sqrt(2))</span><br><span class="line">	fmt.Println(math.Sqrt(2))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>（<em>注：</em> 如果你对该算法的细节感兴趣，上面的 z² − x 是 z² 到它所要到达的值（即 x）的距离， 除以的 2z 为 z² 的导数，我们通过 z² 的变化速度来改变 z 的调整量。 这种通用方法叫做牛顿法。 它对很多函数，特别是平方根而言非常有效。）</p>
+<h4 id="switch"><a href="#switch" class="headerlink" title="switch"></a>switch</h4><p>switch 是编写一连串 if - else 语句的简便方法。它运行第一个值等于条件表达式的 case 语句。</p>
+<p>Go 的 switch 语句类似于 C、C++、Java、JavaScript 和 PHP 中的，不过 Go 只运行选定的 case，而非之后所有的 case。 实际上，Go 自动提供了在这些语言中每个 case 后面所需的 break 语句。 除非以 fallthrough 语句结束，否则分支会自动终止。 Go 的另一点重要的不同在于 switch 的 case 无需为常量，且取值不必为整数。</p>
+<p>switch 的 case 语句从上到下顺次执行，直到匹配成功时停止。</p>
+<p>没有条件的 switch 同 switch true 一样。</p>
+<p>这种形式能将一长串 if-then-else 写得更加清晰。</p>
+<h4 id="defer"><a href="#defer" class="headerlink" title="defer"></a>defer</h4><p>defer 语句会将函数推迟到外层函数返回之后执行。</p>
+<p>推迟调用的函数其参数会立即求值，但直到外层函数返回前该函数都不会被调用。</p>
+<p>推迟的函数调用会被压入一个栈中。当外层函数返回时，被推迟的函数会按照后进先出的顺序调用。</p>
+<h3 id="指针"><a href="#指针" class="headerlink" title="指针"></a>指针</h3><p>Go 拥有指针。指针保存了值的内存地址。</p>
+<p>类型 *T 是指向 T 类型值的指针。其零值为 nil。</p>
+<blockquote>
+<p>var p *int</p>
+</blockquote>
+<p>&amp; 操作符会生成一个指向其操作数的指针。</p>
+<blockquote>
+<p>i := 42<br>p = &amp;i</p>
+</blockquote>
+<ul>
+<li>操作符表示指针指向的底层值。</li>
+</ul>
+<blockquote>
+<p>fmt.Println(*p) // 通过指针 p 读取 i<br>*p = 21         // 通过指针 p 设置 i</p>
+</blockquote>
+<p>这也就是通常所说的“间接引用”或“重定向”。</p>
+<p>与 C 不同，Go 没有指针运算。</p>
+<h4 id="结构体"><a href="#结构体" class="headerlink" title="结构体"></a>结构体</h4><p>一个结构体（struct）就是一组字段（field）。</p>
+<p>结构体字段使用点号来访问。<br>结构体字段可以通过结构体指针来访问。</p>
+<p>如果我们有一个指向结构体的指针 p，那么可以通过 (*p).X 来访问其字段 X。不过这么写太啰嗦了，所以语言也允许我们使用隐式间接引用，直接写 p.X 就可以。</p>
+<p>结构体文法通过直接列出字段的值来新分配一个结构体。</p>
+<p>使用 Name: 语法可以仅列出部分字段。（字段名的顺序无关。）</p>
+<p>特殊的前缀 &amp; 返回一个指向结构体的指针。</p>
+<h4 id="切片"><a href="#切片" class="headerlink" title="切片"></a>切片</h4><p>每个数组的大小都是固定的。而切片则为数组元素提供动态大小的、灵活的视角。在实践中，切片比数组更常用。</p>
+<p>类型 []T 表示一个元素类型为 T 的切片。</p>
+<p>切片通过两个下标来界定，即一个上界和一个下界，二者以冒号分隔：</p>
+<p>a[low : high]<br>它会选择一个半开区间，包括第一个元素，但排除最后一个元素。</p>
+<p>切片就像数组的引用<br>切片并不存储任何数据，它只是描述了底层数组中的一段。</p>
+<p>更改切片的元素会修改其底层数组中对应的元素。</p>
+<p>与它共享底层数组的切片都会观测到这些修改。</p>
+<p>切片文法类似于没有长度的数组文法。</p>
+<p>这是一个数组文法：</p>
+<p>[3]bool{true, true, false}<br>下面这样则会创建一个和上面相同的数组，然后构建一个引用了它的切片：</p>
+<p>[]bool{true, true, false}</p>
+<p>在进行切片时，你可以利用它的默认行为来忽略上下界。</p>
+<p>切片下界的默认值为 0，上界则是该切片的长度。</p>
+<h4 id="切片的长度与容量"><a href="#切片的长度与容量" class="headerlink" title="切片的长度与容量"></a>切片的长度与容量</h4><p>切片拥有 长度 和 容量。</p>
+<p>切片的长度就是它所包含的元素个数。</p>
+<p>切片的容量是从它的第一个元素开始数，到其底层数组元素末尾的个数。</p>
+<p>切片 s 的长度和容量可通过表达式 len(s) 和 cap(s) 来获取。</p>
+<p>nil 切片<br>切片的零值是 nil。</p>
+<p>nil 切片的长度和容量为 0 且没有底层数组。</p>
+<p>用 make 创建切片<br>切片可以用内建函数 make 来创建，这也是你创建动态数组的方式。</p>
+<p>make 函数会分配一个元素为零值的数组并返回一个引用了它的切片：</p>
+<p>a := make([]int, 5)  // len(a)=5<br>要指定它的容量，需向 make 传入第三个参数：</p>
+<p>b := make([]int, 0, 5) // len(b)=0, cap(b)=5</p>
+<p>b = b[:cap(b)] // len(b)=5, cap(b)=5<br>b = b[1:]      // len(b)=4, cap(b)=4</p>
+<p>切片可包含任何类型，甚至包括其它的切片。</p>
+<h4 id="向切片追加元素"><a href="#向切片追加元素" class="headerlink" title="向切片追加元素"></a>向切片追加元素</h4><p>为切片追加新的元素是种常用的操作，为此 Go 提供了内建的 append 函数。内建函数的文档对此函数有详细的介绍。</p>
+<p>func append(s []T, vs …T) []T<br>append 的第一个参数 s 是一个元素类型为 T 的切片，其余类型为 T 的值将会追加到该切片的末尾。</p>
+<p>append 的结果是一个包含原切片所有元素加上新添加元素的切片。</p>
+<p>当 s 的底层数组太小，不足以容纳所有给定的值时，它就会分配一个更大的数组。返回的切片会指向这个新分配的数组。</p>
+<h4 id="Range"><a href="#Range" class="headerlink" title="Range"></a>Range</h4><p>for 循环的 range 形式可遍历切片或映射。</p>
+<p>当使用 for 循环遍历切片时，每次迭代都会返回两个值。第一个值为当前元素的下标，第二个值为该下标所对应元素的一份副本。</p>
+<p>可以将下标或值赋予 _ 来忽略它。</p>
+<p>for i, _ := range pow<br>for _, value := range pow<br>若你只需要索引，忽略第二个变量即可。</p>
+<p>for i := range pow</p>
+<h4 id="练习：切片"><a href="#练习：切片" class="headerlink" title="练习：切片"></a>练习：切片</h4><p>实现 Pic。它应当返回一个长度为 dy 的切片，其中每个元素是一个长度为 dx，元素类型为 uint8 的切片。当你运行此程序时，它会将每个整数解释为灰度值（好吧，其实是蓝度值）并显示它所对应的图像。</p>
+<p>图像的选择由你来定。几个有趣的函数包括 (x+y)/2, x<em>y, x^y, x</em>log(y) 和 x%(y+1)。</p>
+<p>（提示：需要使用循环来分配 [][]uint8 中的每个 []uint8；请使用 uint8(intValue) 在类型之间转换；你可能会用到 math 包中的函数。）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import &quot;golang.org&#x2F;x&#x2F;tour&#x2F;pic&quot;</span><br><span class="line"></span><br><span class="line">func Pic(dx, dy int) [][]uint8 &#123;</span><br><span class="line">	res :&#x3D; make([][]uint8, dy)</span><br><span class="line">    for y :&#x3D; range res &#123;</span><br><span class="line">        res[y] &#x3D; make([]uint8, dx)</span><br><span class="line">        for x :&#x3D; range res[y] &#123;</span><br><span class="line">            res[y][x] &#x3D; uint8((x + y) &#x2F;2)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return res</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	pic.Show(Pic)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="映射"><a href="#映射" class="headerlink" title="映射"></a>映射</h4><p>映射将键映射到值。</p>
+<p>映射的零值为 nil 。nil 映射既没有键，也不能添加键。</p>
+<p>make 函数会返回给定类型的映射，并将其初始化备用。</p>
+<p>修改映射<br>在映射 m 中插入或修改元素：</p>
+<p>m[key] = elem<br>获取元素：</p>
+<p>elem = m[key]<br>删除元素：</p>
+<p>delete(m, key)<br>通过双赋值检测某个键是否存在：</p>
+<p>elem, ok = m[key]<br>若 key 在 m 中，ok 为 true ；否则，ok 为 false。</p>
+<p>若 key 不在映射中，那么 elem 是该映射元素类型的零值。</p>
+<p>同样的，当从映射中读取某个不存在的键时，结果是映射的元素类型的零值。</p>
+<p>注 ：若 elem 或 ok 还未声明，你可以使用短变量声明：</p>
+<p>elem, ok := m[key]</p>
+<h4 id="练习-映射"><a href="#练习-映射" class="headerlink" title="练习:映射"></a>练习:映射</h4><p>实现 WordCount。它应当返回一个映射，其中包含字符串 s 中每个“单词”的个数。函数 wc.Test 会对此函数执行一系列测试用例，并输出成功还是失败。</p>
+<p>你会发现 strings.Fields 很有帮助。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">	&quot;golang.org&#x2F;x&#x2F;tour&#x2F;wc&quot;</span><br><span class="line">	&quot;strings&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func WordCount(s string) map[string]int &#123;</span><br><span class="line">	m :&#x3D; make(map[string]int)</span><br><span class="line">	for _, v :&#x3D; range strings.Fields(s) &#123;</span><br><span class="line">		if _, ok :&#x3D; m[v]; ok &#x3D;&#x3D; true &#123;</span><br><span class="line">			m[v] +&#x3D; 1</span><br><span class="line">		&#125; else &#123;</span><br><span class="line">			m[v] &#x3D; 1</span><br><span class="line">		&#125;</span><br><span class="line">		&#x2F;&#x2F; m[v] +&#x3D; 1</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	return m</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	wc.Test(WordCount)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="函数值"><a href="#函数值" class="headerlink" title="函数值"></a>函数值</h4><p>函数也是值。它们可以像其它值一样传递。</p>
+<p>函数值可以用作函数的参数或返回值。</p>
+<h4 id="函数的闭包"><a href="#函数的闭包" class="headerlink" title="函数的闭包"></a>函数的闭包</h4><p>Go 函数可以是一个闭包。闭包是一个函数值，它引用了其函数体之外的变量。该函数可以访问并赋予其引用的变量的值，换句话说，该函数被这些变量“绑定”在一起。</p>
+<h4 id="练习：斐波纳契闭包"><a href="#练习：斐波纳契闭包" class="headerlink" title="练习：斐波纳契闭包"></a>练习：斐波纳契闭包</h4><p>让我们用函数做些好玩的事情。</p>
+<p>实现一个 fibonacci 函数，它返回一个函数（闭包），该闭包返回一个斐波纳契数列 <code>(0, 1, 1, 2, 3, 5, ...)</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import &quot;fmt&quot;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 返回一个“返回int的函数”</span><br><span class="line">func fibonacci() func() int &#123;</span><br><span class="line">	a :&#x3D; 0</span><br><span class="line">	b :&#x3D; 1</span><br><span class="line">	return func() int &#123;</span><br><span class="line">		a, b &#x3D; b, a+b</span><br><span class="line">		return a</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	f :&#x3D; fibonacci()</span><br><span class="line">	for i :&#x3D; 0; i &lt; 10; i++ &#123;</span><br><span class="line">		fmt.Println(f())</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="方法和接口"><a href="#方法和接口" class="headerlink" title="方法和接口"></a>方法和接口</h2><h3 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h3><p>Go 没有类。不过你可以为结构体类型定义方法。</p>
+<p>方法就是一类带特殊的 接收者 参数的函数。</p>
+<p>方法接收者在它自己的参数列表内，位于 func 关键字和方法名之间。</p>
+<p>你也可以为非结构体类型声明方法。</p>
+<p>在此例中，我们看到了一个带 Abs 方法的数值类型 MyFloat。</p>
+<p>你只能为在同一包内定义的类型的接收者声明方法，而不能为其它包内定义的类型（包括 int 之类的内建类型）的接收者声明方法。</p>
+<p>（译注：就是接收者的类型定义和方法声明必须在同一包内；不能为内建类型声明方法。）</p>
+<h3 id="指针接收者"><a href="#指针接收者" class="headerlink" title="指针接收者"></a>指针接收者</h3><p>你可以为指针接收者声明方法。</p>
+<p>这意味着对于某类型 T，接收者的类型可以用 *T 的文法。（此外，T 不能是像 *int 这样的指针。）</p>
+<p>例如，这里为 *Vertex 定义了 Scale 方法。</p>
+<p>指针接收者的方法可以修改接收者指向的值（就像 Scale 在这做的）。由于方法经常需要修改它的接收者，指针接收者比值接收者更常用。</p>
+<p>若使用值接收者，那么 Scale 方法会对原始 Vertex 值的副本进行操作。（对于函数的其它参数也是如此。）Scale 方法必须用指针接受者来更改 main 函数中声明的 Vertex 的值。</p>
+<p>带指针参数的函数必须接受一个指针：</p>
+<blockquote>
+<p>var v Vertex<br>ScaleFunc(v, 5)  // 编译错误！<br>ScaleFunc(&amp;v, 5) // OK</p>
+</blockquote>
+<p>而以指针为接收者的方法被调用时，接收者既能为值又能为指针：</p>
+<blockquote>
+<p>var v Vertex<br>v.Scale(5)  // OK<br>p := &amp;v<br>p.Scale(10) // OK</p>
+</blockquote>
+<p>对于语句 v.Scale(5)，即便 v 是个值而非指针，带指针接收者的方法也能被直接调用。 也就是说，由于 Scale 方法有一个指针接收者，为方便起见，Go 会将语句 v.Scale(5) 解释为 (&amp;v).Scale(5)。</p>
+<p>同样的事情也发生在相反的方向。</p>
+<p>接受一个值作为参数的函数必须接受一个指定类型的值：</p>
+<p>var v Vertex<br>fmt.Println(AbsFunc(v))  // OK<br>fmt.Println(AbsFunc(&amp;v)) // 编译错误！<br>而以值为接收者的方法被调用时，接收者既能为值又能为指针：</p>
+<p>var v Vertex<br>fmt.Println(v.Abs()) // OK<br>p := &amp;v<br>fmt.Println(p.Abs()) // OK<br>这种情况下，方法调用 p.Abs() 会被解释为 (*p).Abs()。</p>
+<h3 id="接口"><a href="#接口" class="headerlink" title="接口"></a>接口</h3><p>接口类型 是由一组方法签名定义的集合。</p>
+<p>接口类型的变量可以保存任何实现了这些方法的值。</p>
+<p>注意: 示例代码的 22 行存在一个错误。由于 Abs 方法只为 *Vertex （指针类型）定义，因此 Vertex（值类型）并未实现 Abser。</p>
+<p>类型通过实现一个接口的所有方法来实现该接口。既然无需专门显式声明，也就没有“implements”关键字。</p>
+<p>隐式接口从接口的实现中解耦了定义，这样接口的实现可以出现在任何包中，无需提前准备。</p>
+<p>因此，也就无需在每一个实现上增加新的接口名称，这样同时也鼓励了明确的接口定义</p>
+<h3 id="接口值"><a href="#接口值" class="headerlink" title="接口值"></a>接口值</h3><p>接口也是值。它们可以像其它值一样传递。</p>
+<p>接口值可以用作函数的参数或返回值。</p>
+<p>在内部，接口值可以看做包含值和具体类型的元组：</p>
+<p>(value, type)<br>接口值保存了一个具体底层类型的具体值。</p>
+<p>接口值调用方法时会执行其底层类型的同名方法。</p>
+<p>底层值为 nil 的接口值<br>即便接口内的具体值为 nil，方法仍然会被 nil 接收者调用。</p>
+<p>在一些语言中，这会触发一个空指针异常，但在 Go 中通常会写一些方法来优雅地处理它（如本例中的 M 方法）。</p>
+<p>注意: 保存了 nil 具体值的接口其自身并不为 nil。</p>
+<p>nil 接口值<br>nil 接口值既不保存值也不保存具体类型。</p>
+<p>为 nil 接口调用方法会产生运行时错误，因为接口的元组内并未包含能够指明该调用哪个 具体 方法的类型。</p>
+<p>空接口<br>指定了零个方法的接口值被称为 <em>空接口：</em></p>
+<p>interface{}<br>空接口可保存任何类型的值。（因为每个类型都至少实现了零个方法。）</p>
+<p>空接口被用来处理未知类型的值。例如，fmt.Print 可接受类型为 interface{} 的任意数量的参数。</p>
+<h3 id="类型断言"><a href="#类型断言" class="headerlink" title="类型断言"></a>类型断言</h3><p>类型断言 提供了访问接口值底层具体值的方式。</p>
+<p>t := i.(T)<br>该语句断言接口值 i 保存了具体类型 T，并将其底层类型为 T 的值赋予变量 t。</p>
+<p>若 i 并未保存 T 类型的值，该语句就会触发一个恐慌。</p>
+<p>为了 判断 一个接口值是否保存了一个特定的类型，类型断言可返回两个值：其底层值以及一个报告断言是否成功的布尔值。</p>
+<p>t, ok := i.(T)<br>若 i 保存了一个 T，那么 t 将会是其底层值，而 ok 为 true。</p>
+<p>否则，ok 将为 false 而 t 将为 T 类型的零值，程序并不会产生恐慌。</p>
+<p>请注意这种语法和读取一个映射时的相同之处。</p>
+<h3 id="类型选择"><a href="#类型选择" class="headerlink" title="类型选择"></a>类型选择</h3><p>类型选择 是一种按顺序从几个类型断言中选择分支的结构。</p>
+<p>类型选择与一般的 switch 语句相似，不过类型选择中的 case 为类型（而非值）， 它们针对给定接口值所存储的值的类型进行比较。</p>
+<p>switch v := i.(type) {<br>case T:<br>    // v 的类型为 T<br>case S:<br>    // v 的类型为 S<br>default:<br>    // 没有匹配，v 与 i 的类型相同<br>}<br>类型选择中的声明与类型断言 i.(T) 的语法相同，只是具体类型 T 被替换成了关键字 type。</p>
+<p>此选择语句判断接口值 i 保存的值类型是 T 还是 S。在 T 或 S 的情况下，变量 v 会分别按 T 或 S 类型保存 i 拥有的值。在默认（即没有匹配）的情况下，变量 v 与 i 的接口类型和值相同。</p>
+<h3 id="Stringer"><a href="#Stringer" class="headerlink" title="Stringer"></a>Stringer</h3><p>fmt 包中定义的 Stringer 是最普遍的接口之一。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">type Stringer interface &#123;</span><br><span class="line">    String() string</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Stringer 是一个可以用字符串描述自己的类型。fmt 包（还有很多包）都通过此接口来打印值。</p>
+<h4 id="练习：Stringer"><a href="#练习：Stringer" class="headerlink" title="练习：Stringer"></a>练习：Stringer</h4><p>通过让 IPAddr 类型实现 fmt.Stringer 来打印点号分隔的地址。</p>
+<p>例如，IPAddr{1, 2, 3, 4} 应当打印为 “1.2.3.4”。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import &quot;fmt&quot;</span><br><span class="line"></span><br><span class="line">type IPAddr [4]byte</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; TODO: 给 IPAddr 添加一个 &quot;String() string&quot; 方法</span><br><span class="line"></span><br><span class="line">func (p IPAddr)String() string&#123;</span><br><span class="line">	</span><br><span class="line">	return fmt.Sprintf(&quot;%v.%v.%v.%v&quot;, p[0], p[1], p[2], p[3])</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	hosts :&#x3D; map[string]IPAddr&#123;</span><br><span class="line">		&quot;loopback&quot;:  &#123;127, 0, 0, 1&#125;,</span><br><span class="line">		&quot;googleDNS&quot;: &#123;8, 8, 8, 8&#125;,</span><br><span class="line">	&#125;</span><br><span class="line">	for name, ip :&#x3D; range hosts &#123;</span><br><span class="line">		fmt.Printf(&quot;%v: %v\n&quot;, name, ip)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="错误"><a href="#错误" class="headerlink" title="错误"></a>错误</h3><p>Go 程序使用 error 值来表示错误状态。</p>
+<p>与 fmt.Stringer 类似，error 类型是一个内建接口：</p>
+<p>type error interface {<br>    Error() string<br>}<br>（与 fmt.Stringer 类似，fmt 包在打印值时也会满足 error。）</p>
+<p>通常函数会返回一个 error 值，调用的它的代码应当判断这个错误是否等于 nil 来进行错误处理。</p>
+<p>i, err := strconv.Atoi(“42”)<br>if err != nil {<br>    fmt.Printf(“couldn’t convert number: %v\n”, err)<br>    return<br>}<br>fmt.Println(“Converted integer:”, i)<br>error 为 nil 时表示成功；非 nil 的 error 表示失败。</p>
+<h3 id="Reader"><a href="#Reader" class="headerlink" title="Reader"></a>Reader</h3><p>io 包指定了 io.Reader 接口，它表示从数据流的末尾进行读取。</p>
+<p>Go 标准库包含了该接口的许多实现，包括文件、网络连接、压缩和加密等等。</p>
+<p>io.Reader 接口有一个 Read 方法：</p>
+<p>func (T) Read(b []byte) (n int, err error)<br>Read 用数据填充给定的字节切片并返回填充的字节数和错误值。在遇到数据流的结尾时，它会返回一个 io.EOF 错误。</p>
+<p>示例代码创建了一个 strings.Reader 并以每次 8 字节的速度读取它的输出。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">	&quot;fmt&quot;</span><br><span class="line">	&quot;io&quot;</span><br><span class="line">	&quot;strings&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	r :&#x3D; strings.NewReader(&quot;Hello, Reader!&quot;)</span><br><span class="line"></span><br><span class="line">	b :&#x3D; make([]byte, 8)</span><br><span class="line">	for &#123;</span><br><span class="line">		n, err :&#x3D; r.Read(b)</span><br><span class="line">		fmt.Printf(&quot;n &#x3D; %v err &#x3D; %v b &#x3D; %v\n&quot;, n, err, b)</span><br><span class="line">		fmt.Printf(&quot;b[:n] &#x3D; %q\n&quot;, b[:n])</span><br><span class="line">		if err &#x3D;&#x3D; io.EOF &#123;</span><br><span class="line">			break</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="图像"><a href="#图像" class="headerlink" title="图像"></a>图像</h3><p>image 包定义了 Image 接口：</p>
+<p>package image</p>
+<p>type Image interface {<br>    ColorModel() color.Model<br>    Bounds() Rectangle<br>    At(x, y int) color.Color<br>}<br>注意: Bounds 方法的返回值 Rectangle 实际上是一个 image.Rectangle，它在 image 包中声明。</p>
+<h2 id="并发"><a href="#并发" class="headerlink" title="并发"></a>并发</h2><h3 id="Go-程"><a href="#Go-程" class="headerlink" title="Go 程"></a>Go 程</h3><p>Go 程（goroutine）是由 Go 运行时管理的轻量级线程。</p>
+<p>go f(x, y, z)<br>会启动一个新的 Go 程并执行</p>
+<p>f(x, y, z)<br>f, x, y 和 z 的求值发生在当前的 Go 程中，而 f 的执行发生在新的 Go 程中。</p>
+<p>Go 程在相同的地址空间中运行，因此在访问共享的内存时必须进行同步。sync 包提供了这种能力，不过在 Go 中并不经常用到，因为还有其它的办法</p>
+<h3 id="带缓冲的信道"><a href="#带缓冲的信道" class="headerlink" title="带缓冲的信道"></a>带缓冲的信道</h3><p>信道可以是 带缓冲的。将缓冲长度作为第二个参数提供给 make 来初始化一个带缓冲的信道：</p>
+<p>ch := make(chan int, 100)<br>仅当信道的缓冲区填满后，向其发送数据时才会阻塞。当缓冲区为空时，接受方会阻塞。</p>
+<p>range 和 close<br>发送者可通过 close 关闭一个信道来表示没有需要发送的值了。接收者可以通过为接收表达式分配第二个参数来测试信道是否被关闭：若没有值可以接收且信道已被关闭，那么在执行完</p>
+<p>v, ok := &lt;-ch<br>之后 ok 会被设置为 false。</p>
+<p>循环 for i := range c 会不断从信道接收值，直到它被关闭。</p>
+<p><em>注意：</em> 只有发送者才能关闭信道，而接收者不能。向一个已经关闭的信道发送数据会引发程序恐慌（panic）。</p>
+<p><em>还要注意：</em> 信道与文件不同，通常情况下无需关闭它们。只有在必须告诉接收者不再有需要发送的值时才有必要关闭，例如终止一个 range 循环。</p>
+<h3 id="select-语句"><a href="#select-语句" class="headerlink" title="select 语句"></a>select 语句</h3><p>select 语句使一个 Go 程可以等待多个通信操作。</p>
+<p>select 会阻塞到某个分支可以继续执行为止，这时就会执行该分支。当多个分支都准备好时会随机选择一个执行。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import &quot;fmt&quot;</span><br><span class="line"></span><br><span class="line">func fibonacci(c, quit chan int) &#123;</span><br><span class="line">	x, y :&#x3D; 0, 1</span><br><span class="line">	for &#123;</span><br><span class="line">		select &#123;</span><br><span class="line">		case c &lt;- x:</span><br><span class="line">			x, y &#x3D; y, x+y</span><br><span class="line">		case &lt;-quit:</span><br><span class="line">			fmt.Println(&quot;quit&quot;)</span><br><span class="line">			return</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	c :&#x3D; make(chan int)</span><br><span class="line">	quit :&#x3D; make(chan int)</span><br><span class="line">	go func() &#123;</span><br><span class="line">		for i :&#x3D; 0; i &lt; 10; i++ &#123;</span><br><span class="line">			fmt.Println(&lt;-c)</span><br><span class="line">		&#125;</span><br><span class="line">		quit &lt;- 0</span><br><span class="line">	&#125;()</span><br><span class="line">	fibonacci(c, quit)</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="默认选择"><a href="#默认选择" class="headerlink" title="默认选择"></a>默认选择</h4><p>当 select 中的其它分支都没有准备好时，default 分支就会执行。</p>
+<p>为了在尝试发送或者接收时不发生阻塞，可使用 default 分支：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">select &#123;</span><br><span class="line">case i :&#x3D; &lt;-c:</span><br><span class="line">    &#x2F;&#x2F; 使用 i</span><br><span class="line">default:</span><br><span class="line">    &#x2F;&#x2F; 从 c 中接收会阻塞时执行</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="sync-Mutex"><a href="#sync-Mutex" class="headerlink" title="sync.Mutex"></a>sync.Mutex</h4><p>我们已经看到信道非常适合在各个 Go 程间进行通信。</p>
+<p>但是如果我们并不需要通信呢？比如说，若我们只是想保证每次只有一个 Go 程能够访问一个共享的变量，从而避免冲突？</p>
+<p>这里涉及的概念叫做 <em>互斥（mutual</em>exclusion）* ，我们通常使用 <em>互斥锁（Mutex）</em> 这一数据结构来提供这种机制。</p>
+<p>Go 标准库中提供了 sync.Mutex 互斥锁类型及其两个方法：</p>
+<p>Lock<br>Unlock<br>我们可以通过在代码前调用 Lock 方法，在代码后调用 Unlock 方法来保证一段代码的互斥执行。参见 Inc 方法。</p>
+<p>我们也可以用 defer 语句来保证互斥锁一定会被解锁。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>Coffee? ☕</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/uploads/wechat-reward-image.png" alt="妖小灰 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/uploads/alipay-reward-image.png" alt="妖小灰 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/Go/" rel="tag"><i class="fa fa-tag"></i> Go</a>
+              <a href="/tags/tutorial/" rel="tag"><i class="fa fa-tag"></i> tutorial</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/07/%C2%B8%C3%9F%C3%90O%CC%82A%CC%88U%CC%88MySQL-%C2%B6A%CC%81E%CC%82e%CC%81%C2%B1E%CC%82%C2%BCC%CC%A73/" rel="prev" title="高性能MySQL-读书笔记3">
+      <i class="fa fa-chevron-left"></i> 高性能MySQL-读书笔记3
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8zMTk1MS84NTE1"></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Basic"><span class="nav-number">1.</span> <span class="nav-text">Basic</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%85"><span class="nav-number">1.1.</span> <span class="nav-text">包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%BC%E5%85%A5"><span class="nav-number">1.2.</span> <span class="nav-text">导入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%BC%E5%87%BA%E5%90%8D"><span class="nav-number">1.3.</span> <span class="nav-text">导出名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%BD%E6%95%B0"><span class="nav-number">1.4.</span> <span class="nav-text">函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E5%80%BC%E8%BF%94%E5%9B%9E"><span class="nav-number">1.5.</span> <span class="nav-text">多值返回</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%91%BD%E5%90%8D%E8%BF%94%E5%9B%9E%E5%80%BC"><span class="nav-number">1.6.</span> <span class="nav-text">命名返回值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%98%E9%87%8F"><span class="nav-number">1.7.</span> <span class="nav-text">变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%98%E9%87%8F%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">1.8.</span> <span class="nav-text">变量的初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9F%AD%E5%8F%98%E9%87%8F%E5%A3%B0%E6%98%8E"><span class="nav-number">1.9.</span> <span class="nav-text">短变量声明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.10.</span> <span class="nav-text">基本类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%B6%E5%80%BC"><span class="nav-number">1.11.</span> <span class="nav-text">零值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2"><span class="nav-number">1.12.</span> <span class="nav-text">类型转换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B1%BB%E5%9E%8B%E6%8E%A8%E5%AF%BC"><span class="nav-number">1.13.</span> <span class="nav-text">类型推导</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E9%87%8F"><span class="nav-number">1.14.</span> <span class="nav-text">常量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E5%80%BC%E5%B8%B8%E9%87%8F"><span class="nav-number">1.15.</span> <span class="nav-text">数值常量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E8%AF%AD%E5%8F%A5"><span class="nav-number">1.16.</span> <span class="nav-text">流程控制语句</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#for"><span class="nav-number">1.16.1.</span> <span class="nav-text">for</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A0%E9%99%90%E5%BE%AA%E7%8E%AF"><span class="nav-number">1.16.2.</span> <span class="nav-text">无限循环</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#if"><span class="nav-number">1.16.3.</span> <span class="nav-text">if</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%83%E4%B9%A0%EF%BC%9A%E5%BE%AA%E7%8E%AF%E4%B8%8E%E5%87%BD%E6%95%B0"><span class="nav-number">1.16.4.</span> <span class="nav-text">练习：循环与函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#switch"><span class="nav-number">1.16.5.</span> <span class="nav-text">switch</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#defer"><span class="nav-number">1.16.6.</span> <span class="nav-text">defer</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%87%E9%92%88"><span class="nav-number">1.17.</span> <span class="nav-text">指针</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E4%BD%93"><span class="nav-number">1.17.1.</span> <span class="nav-text">结构体</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%87%E7%89%87"><span class="nav-number">1.17.2.</span> <span class="nav-text">切片</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%87%E7%89%87%E7%9A%84%E9%95%BF%E5%BA%A6%E4%B8%8E%E5%AE%B9%E9%87%8F"><span class="nav-number">1.17.3.</span> <span class="nav-text">切片的长度与容量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%91%E5%88%87%E7%89%87%E8%BF%BD%E5%8A%A0%E5%85%83%E7%B4%A0"><span class="nav-number">1.17.4.</span> <span class="nav-text">向切片追加元素</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Range"><span class="nav-number">1.17.5.</span> <span class="nav-text">Range</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%83%E4%B9%A0%EF%BC%9A%E5%88%87%E7%89%87"><span class="nav-number">1.17.6.</span> <span class="nav-text">练习：切片</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%98%A0%E5%B0%84"><span class="nav-number">1.17.7.</span> <span class="nav-text">映射</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%83%E4%B9%A0-%E6%98%A0%E5%B0%84"><span class="nav-number">1.17.8.</span> <span class="nav-text">练习:映射</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%87%BD%E6%95%B0%E5%80%BC"><span class="nav-number">1.17.9.</span> <span class="nav-text">函数值</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%87%BD%E6%95%B0%E7%9A%84%E9%97%AD%E5%8C%85"><span class="nav-number">1.17.10.</span> <span class="nav-text">函数的闭包</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%83%E4%B9%A0%EF%BC%9A%E6%96%90%E6%B3%A2%E7%BA%B3%E5%A5%91%E9%97%AD%E5%8C%85"><span class="nav-number">1.17.11.</span> <span class="nav-text">练习：斐波纳契闭包</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E5%92%8C%E6%8E%A5%E5%8F%A3"><span class="nav-number">2.</span> <span class="nav-text">方法和接口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95"><span class="nav-number">2.1.</span> <span class="nav-text">方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%87%E9%92%88%E6%8E%A5%E6%94%B6%E8%80%85"><span class="nav-number">2.2.</span> <span class="nav-text">指针接收者</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3"><span class="nav-number">2.3.</span> <span class="nav-text">接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3%E5%80%BC"><span class="nav-number">2.4.</span> <span class="nav-text">接口值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B1%BB%E5%9E%8B%E6%96%AD%E8%A8%80"><span class="nav-number">2.5.</span> <span class="nav-text">类型断言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B1%BB%E5%9E%8B%E9%80%89%E6%8B%A9"><span class="nav-number">2.6.</span> <span class="nav-text">类型选择</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Stringer"><span class="nav-number">2.7.</span> <span class="nav-text">Stringer</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%83%E4%B9%A0%EF%BC%9AStringer"><span class="nav-number">2.7.1.</span> <span class="nav-text">练习：Stringer</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%99%E8%AF%AF"><span class="nav-number">2.8.</span> <span class="nav-text">错误</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Reader"><span class="nav-number">2.9.</span> <span class="nav-text">Reader</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%BE%E5%83%8F"><span class="nav-number">2.10.</span> <span class="nav-text">图像</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91"><span class="nav-number">3.</span> <span class="nav-text">并发</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Go-%E7%A8%8B"><span class="nav-number">3.1.</span> <span class="nav-text">Go 程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%A6%E7%BC%93%E5%86%B2%E7%9A%84%E4%BF%A1%E9%81%93"><span class="nav-number">3.2.</span> <span class="nav-text">带缓冲的信道</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#select-%E8%AF%AD%E5%8F%A5"><span class="nav-number">3.3.</span> <span class="nav-text">select 语句</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%BB%98%E8%AE%A4%E9%80%89%E6%8B%A9"><span class="nav-number">3.3.1.</span> <span class="nav-text">默认选择</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#sync-Mutex"><span class="nav-number">3.3.2.</span> <span class="nav-text">sync.Mutex</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="妖小灰"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">妖小灰</p>
+  <div class="site-description" itemprop="description">(╯‵□′)╯︵┻━┻.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">38</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">44</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Sun2yKid/" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Sun2yKid&#x2F;" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.facebook.com/zhonghua00700/" title="Facebook → https:&#x2F;&#x2F;www.facebook.com&#x2F;zhonghua00700&#x2F;" rel="noopener" target="_blank"><i class="fab fa-facebook fa-fw"></i>Facebook</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/1751826157/" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1751826157&#x2F;" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://zhonghua00700.lofter.com/" title="Lofter → http:&#x2F;&#x2F;zhonghua00700.lofter.com&#x2F;" rel="noopener" target="_blank"><i class="fab fa-camera fa-fw"></i>Lofter</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://docs.sun2y.me/" title="https:&#x2F;&#x2F;docs.sun2y.me&#x2F;" rel="noopener" target="_blank">Reading Notes</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.jianshu.com/u/0c026eae82a2" title="https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;0c026eae82a2" rel="noopener" target="_blank">Jianshu</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://ncov.sun2y.me/" title="http:&#x2F;&#x2F;ncov.sun2y.me&#x2F;" rel="noopener" target="_blank">2019nCoV</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">妖小灰</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

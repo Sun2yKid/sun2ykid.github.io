@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Trebuchet MS:300,300italic,400,400italic,700,700italic|0.9:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"sun2y.me","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="windows 10上安装 Docker Desktop">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Windows 10上安装Docker Desktop 并启用Kubernetes">
+<meta property="og:url" content="http://sun2y.me/2020/02/14/Windows-10E%CC%81I%CC%88%C2%B0%C2%B2%C3%97%C2%B0Docker-Desktop-%C2%B2%C2%A2%C3%86o%CC%82O%CC%81A%CC%83Kubernetes/index.html">
+<meta property="og:site_name" content="妖小灰">
+<meta property="og:description" content="windows 10上安装 Docker Desktop">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://sun2y.me/images/docker/docker_desktop.png">
+<meta property="og:image" content="http://sun2y.me/images/docker/docker_desktop1.png">
+<meta property="og:image" content="http://sun2y.me/images/docker/docker_desktop2.png">
+<meta property="og:image" content="http://sun2y.me/images/docker/docker_desktop3.png">
+<meta property="og:image" content="http://sun2y.me/images/docker/docker_desktop4.png">
+<meta property="og:image" content="http://sun2y.me/images/docker/docker_desktop5.png">
+<meta property="article:published_time" content="2020-02-14T09:42:45.000Z">
+<meta property="article:modified_time" content="2020-02-15T03:12:48.000Z">
+<meta property="article:author" content="妖小灰">
+<meta property="article:tag" content="容器">
+<meta property="article:tag" content="docker">
+<meta property="article:tag" content="kubernetes">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://sun2y.me/images/docker/docker_desktop.png">
+
+<link rel="canonical" href="http://sun2y.me/2020/02/14/Windows-10E%CC%81I%CC%88%C2%B0%C2%B2%C3%97%C2%B0Docker-Desktop-%C2%B2%C2%A2%C3%86o%CC%82O%CC%81A%CC%83Kubernetes/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Windows 10上安装Docker Desktop 并启用Kubernetes | 妖小灰</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-124173268-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-124173268-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?a5f08efba4fa4000554315eb2383dab4";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">妖小灰</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Never too late to learn.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://sun2y.me/2020/02/14/Windows-10E%CC%81I%CC%88%C2%B0%C2%B2%C3%97%C2%B0Docker-Desktop-%C2%B2%C2%A2%C3%86o%CC%82O%CC%81A%CC%83Kubernetes/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="妖小灰">
+      <meta itemprop="description" content="(╯‵□′)╯︵┻━┻.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="妖小灰">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Windows 10上安装Docker Desktop 并启用Kubernetes
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-02-14 17:42:45" itemprop="dateCreated datePublished" datetime="2020-02-14T17:42:45+08:00">2020-02-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-02-15 11:12:48" itemprop="dateModified" datetime="2020-02-15T11:12:48+08:00">2020-02-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index"><span itemprop="name">技术</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>windows 10上安装 <a target="_blank" rel="noopener" href="https://hub.docker.com/?overlay=onboarding">Docker Desktop</a></p>
+<a id="more"></a>
+
+<h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><p>OS: Windows 10<br>终端：PowerShell</p>
+<h2 id="Docker-overview"><a href="#Docker-overview" class="headerlink" title="Docker overview"></a><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/docker-overview/">Docker overview</a></h2><p>Docker is an open platform for developing, shipping, and running applications. Docker enables you to separate your applications from your infrastructure so you can deliver software quickly. With Docker, you can manage your infrastructure in the same ways you manage your applications. By taking advantage of Docker’s methodologies for shipping, testing, and deploying code quickly, you can significantly reduce the delay between writing code and running it in production.</p>
+<h2 id="安装Docker-Desktop"><a href="#安装Docker-Desktop" class="headerlink" title="安装Docker Desktop"></a>安装Docker Desktop</h2><p>Docker Desktop 为windows提供社区版本，可以直接从<a target="_blank" rel="noopener" href="https://hub.docker.com/?overlay=onboarding">Docker Hub</a>上下载并安装。</p>
+<p>安装完成之后可以跟着Quick Start, 完成一个简单的容器的下载，构建，运行流程。</p>
+<p>右击系统托盘的docker图标，点击”About Docker Desktop”，可以获取各组件版本信息</p>
+<p><img src="/images/docker/docker_desktop.png" alt="docker_desktop.png"></p>
+<h2 id="开启Kubernetes"><a href="#开启Kubernetes" class="headerlink" title="开启Kubernetes"></a>开启Kubernetes</h2><p>不要直接在设置-&gt;Kubernetes中开启，否则会出现Kubernetes一直处于启动状态，无法结束，按照如下教程<a target="_blank" rel="noopener" href="https://github.com/AliyunContainerService/k8s-for-docker-desktop">Docker Desktop for Mac/Windows 开启 Kubernetes</a></p>
+<h3 id="为-Docker-daemon-配置镜像加速"><a href="#为-Docker-daemon-配置镜像加速" class="headerlink" title="为 Docker daemon 配置镜像加速"></a>为 Docker daemon 配置镜像加速</h3><p>Setting -&gt; Docker Engine中修改配置文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;registry-mirrors&quot;: [</span><br><span class="line">    &quot;https:&#x2F;&#x2F;docker.mirrors.ustc.edu.cn&quot;</span><br><span class="line">  ],</span><br><span class="line">  &quot;insecure-registries&quot;: [],</span><br><span class="line">  &quot;debug&quot;: true,</span><br><span class="line">  &quot;experimental&quot;: true</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="/images/docker/docker_desktop1.png" alt="docker_desktop1.png"></p>
+<h3 id="下载Kubernetes所需镜像"><a href="#下载Kubernetes所需镜像" class="headerlink" title="下载Kubernetes所需镜像"></a>下载Kubernetes所需镜像</h3><p>预先从阿里云Docker镜像服务下载 Kubernetes 所需要的镜像， 并cd进去</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git clone https:&#x2F;&#x2F;github.com&#x2F;AliyunContainerService&#x2F;k8s-for-docker-desktop.git</span><br><span class="line">cd .\k8s-for-docker-desktop\   </span><br></pre></td></tr></table></figure>
+
+<p>checkout 到Docker Desktop中Kubernetes对应版本的号</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git checkout v1.15.5</span><br></pre></td></tr></table></figure>
+
+<p>在Windows上, 以管理员身份启动PowerShell, 运行<code>Set-ExecutionPolicy RemoteSigned</code>, 然后运行如下命令，启动下载Kubernetes所需镜像</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.\load_images.ps1</span><br></pre></td></tr></table></figure>
+
+<p>镜像下载完成后，进入Setting, 开启 Kubernetes，并等待 Kubernetes 开始运行</p>
+<p><img src="/images/docker/docker_desktop2.png" alt="docker_desktop2.png"></p>
+<h3 id="配置-Kubernetes-控制台"><a href="#配置-Kubernetes-控制台" class="headerlink" title="配置 Kubernetes 控制台"></a>配置 Kubernetes 控制台</h3><p>部署Kubernetes dashboard, 并开启API Server访问代理</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl create -f kubernetes-dashboard.yaml</span><br><span class="line"></span><br><span class="line">kubectl proxy</span><br></pre></td></tr></table></figure>
+<p><img src="/images/docker/docker_desktop3.png" alt="docker_desktop3.png"></p>
+<p>通过如下URL访问 Kubernetes dashboard</p>
+<p><a target="_blank" rel="noopener" href="http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/overview?namespace=default">http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/overview?namespace=default</a></p>
+<h3 id="登录dashboard"><a href="#登录dashboard" class="headerlink" title="登录dashboard"></a>登录dashboard</h3><ul>
+<li>生成访问令牌登录<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$TOKEN&#x3D;((kubectl -n kube-system describe secret default | Select-String &quot;token:&quot;) -split &quot; +&quot;)[1]</span><br><span class="line">kubectl config set-credentials docker-for-desktop --token&#x3D;&quot;$&#123;TOKEN&#125;&quot;</span><br><span class="line">echo $TOKEN</span><br></pre></td></tr></table></figure></li>
+<li>使用Kube文件登录<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">%UserProfile%\.kube\config</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><p><a target="_blank" rel="noopener" href="https://docs.docker.com/get-started/orchestration/">官方教程</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pods -n kube-system</span><br></pre></td></tr></table></figure>
+<p><img src="/images/docker/docker_desktop4.png" alt="docker_desktop4.png"></p>
+<p>为确保Kubernetes正常启动和运行，创建一个名为pod.yaml的文本文件，内容如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: v1</span><br><span class="line"></span><br><span class="line">kind: Pod</span><br><span class="line"></span><br><span class="line">metadata:</span><br><span class="line"></span><br><span class="line">  name: demo</span><br><span class="line"></span><br><span class="line">spec:</span><br><span class="line"></span><br><span class="line">  containers:</span><br><span class="line"></span><br><span class="line">  - name: testpod</span><br><span class="line"></span><br><span class="line">    image: alpine:3.5</span><br><span class="line"></span><br><span class="line">    command: [&quot;ping&quot;, &quot;114.114.114.114&quot;]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>该文件用于创建一个pod，且该pod中仅有一个容器，在该容器中执行ping命令</p>
+<p>在Powershell中执行如下命令创建pod</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\Kid\docker&gt; kubectl apply -f pod.yaml</span><br><span class="line">pod&#x2F;demo created</span><br></pre></td></tr></table></figure>
+
+<p>查看pods状态和日志</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\Kid\docker&gt; kubectl get pods</span><br><span class="line">NAME   READY   STATUS    RESTARTS   AGE</span><br><span class="line">demo   1&#x2F;1     Running   0          43s</span><br><span class="line">PS C:\Users\Kid\docker&gt; kubectl logs demo</span><br><span class="line">PING 114.114.114.114 (114.114.114.114): 56 data bytes</span><br><span class="line">64 bytes from 114.114.114.114: seq&#x3D;0 ttl&#x3D;37 time&#x3D;17.616 ms</span><br><span class="line">64 bytes from 114.114.114.114: seq&#x3D;1 ttl&#x3D;37 time&#x3D;18.877 ms</span><br><span class="line">64 bytes from 114.114.114.114: seq&#x3D;2 ttl&#x3D;37 time&#x3D;15.548 ms</span><br><span class="line">64 bytes from 114.114.114.114: seq&#x3D;3 ttl&#x3D;37 time&#x3D;18.090 ms</span><br><span class="line">64 bytes from 114.114.114.114: seq&#x3D;4 ttl&#x3D;37 time&#x3D;48.770 ms</span><br><span class="line">64 bytes from 114.114.114.114: seq&#x3D;5 ttl&#x3D;37 time&#x3D;15.864 ms</span><br></pre></td></tr></table></figure>
+
+<p>删除pod</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\Kid\docker&gt; kubectl delete pod demo</span><br><span class="line">pod &quot;demo&quot; deleted</span><br><span class="line">PS C:\Users\Kid\docker&gt;</span><br><span class="line">PS C:\Users\Kid\docker&gt; kubectl get pods</span><br><span class="line">No resources found.</span><br></pre></td></tr></table></figure>
+
+<h2 id="部署到Kubernetes"><a href="#部署到Kubernetes" class="headerlink" title="部署到Kubernetes"></a>部署到Kubernetes</h2><p><a target="_blank" rel="noopener" href="https://docs.docker.com/get-started/kube-deploy/">官方教程</a></p>
+<p>Kubernetes provides many tools for scaling, networking, securing and maintaining your containerized applications, above and beyond the abilities of containers themselves.</p>
+<h3 id="用Kubernetes-YAML来描述apps"><a href="#用Kubernetes-YAML来描述apps" class="headerlink" title="用Kubernetes YAML来描述apps"></a>用Kubernetes YAML来描述apps</h3><p>All containers in Kubernetes are scheduled as pods, which are groups of co-located containers that share some resources. Furthermore, in a realistic application we almost never create individual pods; instead, most of our workloads are scheduled as deployments, which are scalable groups of pods maintained automatically by Kubernetes. Lastly, all Kubernetes objects can and should be described in manifests called Kubernetes YAML files. These YAML files describe all the components and configurations of your Kubernetes app, and can be used to easily create and destroy your app in any Kubernetes environment.</p>
+<p>创建一个bb.yaml文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: apps&#x2F;v1</span><br><span class="line"> kind: Deployment</span><br><span class="line"> metadata:</span><br><span class="line">   name: bb-demo</span><br><span class="line">   namespace: default</span><br><span class="line"> spec:</span><br><span class="line">   replicas: 1</span><br><span class="line">   selector:</span><br><span class="line">     matchLabels:</span><br><span class="line">       bb: web</span><br><span class="line">   template:</span><br><span class="line">     metadata:</span><br><span class="line">       labels:</span><br><span class="line">         bb: web</span><br><span class="line">     spec:</span><br><span class="line">       containers:</span><br><span class="line">       - name: bb-site</span><br><span class="line">         image: bulletinboard:1.0</span><br><span class="line"> ---</span><br><span class="line"> apiVersion: v1</span><br><span class="line"> kind: Service</span><br><span class="line"> metadata:</span><br><span class="line">   name: bb-entrypoint</span><br><span class="line">   namespace: default</span><br><span class="line"> spec:</span><br><span class="line">   type: NodePort</span><br><span class="line">   selector:</span><br><span class="line">     bb: web</span><br><span class="line">   ports:</span><br><span class="line">   - port: 8080</span><br><span class="line">     targetPort: 8080</span><br><span class="line">     nodePort: 30001</span><br></pre></td></tr></table></figure>
+
+<h3 id="deploy"><a href="#deploy" class="headerlink" title="deploy"></a>deploy</h3><p>bb.yaml同目录下，部署</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f bb.yaml</span><br></pre></td></tr></table></figure>
+
+<p>列出deployments(部署), pods(容器组)，services(服务)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl get deployments</span><br><span class="line">kubectl get pods</span><br><span class="line">kubectl get services</span><br></pre></td></tr></table></figure>
+
+<p>删除部署</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete -f bb.yaml</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/docker/docker_desktop5.png" alt="docker_desktop5.png"></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>Coffee? ☕</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/uploads/wechat-reward-image.png" alt="妖小灰 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/uploads/alipay-reward-image.png" alt="妖小灰 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E5%AE%B9%E5%99%A8/" rel="tag"><i class="fa fa-tag"></i> 容器</a>
+              <a href="/tags/docker/" rel="tag"><i class="fa fa-tag"></i> docker</a>
+              <a href="/tags/kubernetes/" rel="tag"><i class="fa fa-tag"></i> kubernetes</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/02/09/%C2%BBu%CC%81%C3%86%C3%B7N%CC%83%C2%A7I%CC%88%C2%B0-Andrew-Ng%C2%A1%C2%B6Machine-Learning%C2%A1%C2%B7%C2%BFI%CC%82%C2%B3I%CC%80%C2%B1E%CC%82%C2%BCC%CC%A73/" rel="prev" title="机器学习 Andrew Ng《Machine Learning》课程笔记3">
+      <i class="fa fa-chevron-left"></i> 机器学习 Andrew Ng《Machine Learning》课程笔记3
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/05/%C2%B8%C3%9F%C3%90O%CC%82A%CC%88U%CC%88MySQL-%C2%B6A%CC%81E%CC%82e%CC%81%C2%B1E%CC%82%C2%BCC%CC%A71/" rel="next" title="高性能MySQL-读书笔记1">
+      高性能MySQL-读书笔记1 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8zMTk1MS84NTE1"></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83"><span class="nav-number">1.</span> <span class="nav-text">环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Docker-overview"><span class="nav-number">2.</span> <span class="nav-text">Docker overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Docker-Desktop"><span class="nav-number">3.</span> <span class="nav-text">安装Docker Desktop</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E5%90%AFKubernetes"><span class="nav-number">4.</span> <span class="nav-text">开启Kubernetes</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA-Docker-daemon-%E9%85%8D%E7%BD%AE%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F"><span class="nav-number">4.1.</span> <span class="nav-text">为 Docker daemon 配置镜像加速</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BDKubernetes%E6%89%80%E9%9C%80%E9%95%9C%E5%83%8F"><span class="nav-number">4.2.</span> <span class="nav-text">下载Kubernetes所需镜像</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE-Kubernetes-%E6%8E%A7%E5%88%B6%E5%8F%B0"><span class="nav-number">4.3.</span> <span class="nav-text">配置 Kubernetes 控制台</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%99%BB%E5%BD%95dashboard"><span class="nav-number">4.4.</span> <span class="nav-text">登录dashboard</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95"><span class="nav-number">4.5.</span> <span class="nav-text">测试</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2%E5%88%B0Kubernetes"><span class="nav-number">5.</span> <span class="nav-text">部署到Kubernetes</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8Kubernetes-YAML%E6%9D%A5%E6%8F%8F%E8%BF%B0apps"><span class="nav-number">5.1.</span> <span class="nav-text">用Kubernetes YAML来描述apps</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#deploy"><span class="nav-number">5.2.</span> <span class="nav-text">deploy</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="妖小灰"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">妖小灰</p>
+  <div class="site-description" itemprop="description">(╯‵□′)╯︵┻━┻.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">38</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">44</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Sun2yKid/" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Sun2yKid&#x2F;" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.facebook.com/zhonghua00700/" title="Facebook → https:&#x2F;&#x2F;www.facebook.com&#x2F;zhonghua00700&#x2F;" rel="noopener" target="_blank"><i class="fab fa-facebook fa-fw"></i>Facebook</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/1751826157/" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1751826157&#x2F;" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://zhonghua00700.lofter.com/" title="Lofter → http:&#x2F;&#x2F;zhonghua00700.lofter.com&#x2F;" rel="noopener" target="_blank"><i class="fab fa-camera fa-fw"></i>Lofter</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://docs.sun2y.me/" title="https:&#x2F;&#x2F;docs.sun2y.me&#x2F;" rel="noopener" target="_blank">Reading Notes</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.jianshu.com/u/0c026eae82a2" title="https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;0c026eae82a2" rel="noopener" target="_blank">Jianshu</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://ncov.sun2y.me/" title="http:&#x2F;&#x2F;ncov.sun2y.me&#x2F;" rel="noopener" target="_blank">2019nCoV</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">妖小灰</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

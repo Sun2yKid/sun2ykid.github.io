@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Trebuchet MS:300,300italic,400,400italic,700,700italic|0.9:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"sun2y.me","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="高性能MySQL第三版 [美] Baron Scbwartz, Peter Zaitsev, Vadim Tkacbenko 第6章 查询性能优化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="高性能MySQL-读书笔记3">
+<meta property="og:url" content="http://sun2y.me/2020/03/07/%C2%B8%C3%9F%C3%90O%CC%82A%CC%88U%CC%88MySQL-%C2%B6A%CC%81E%CC%82e%CC%81%C2%B1E%CC%82%C2%BCC%CC%A73/index.html">
+<meta property="og:site_name" content="妖小灰">
+<meta property="og:description" content="高性能MySQL第三版 [美] Baron Scbwartz, Peter Zaitsev, Vadim Tkacbenko 第6章 查询性能优化">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://sun2y.me/images/mysql-search.jpg">
+<meta property="article:published_time" content="2020-03-07T12:15:52.000Z">
+<meta property="article:modified_time" content="2020-03-10T04:21:54.000Z">
+<meta property="article:author" content="妖小灰">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="读书笔记">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://sun2y.me/images/mysql-search.jpg">
+
+<link rel="canonical" href="http://sun2y.me/2020/03/07/%C2%B8%C3%9F%C3%90O%CC%82A%CC%88U%CC%88MySQL-%C2%B6A%CC%81E%CC%82e%CC%81%C2%B1E%CC%82%C2%BCC%CC%A73/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>高性能MySQL-读书笔记3 | 妖小灰</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-124173268-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-124173268-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?a5f08efba4fa4000554315eb2383dab4";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">妖小灰</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Never too late to learn.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://sun2y.me/2020/03/07/%C2%B8%C3%9F%C3%90O%CC%82A%CC%88U%CC%88MySQL-%C2%B6A%CC%81E%CC%82e%CC%81%C2%B1E%CC%82%C2%BCC%CC%A73/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="妖小灰">
+      <meta itemprop="description" content="(╯‵□′)╯︵┻━┻.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="妖小灰">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          高性能MySQL-读书笔记3
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-03-07 20:15:52" itemprop="dateCreated datePublished" datetime="2020-03-07T20:15:52+08:00">2020-03-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-03-10 12:21:54" itemprop="dateModified" datetime="2020-03-10T12:21:54+08:00">2020-03-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index"><span itemprop="name">技术</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><a target="_blank" rel="noopener" href="https://book.douban.com/subject/23008813/">高性能MySQL第三版</a></p>
+<p>[美] Baron Scbwartz, Peter Zaitsev, Vadim Tkacbenko</p>
+<h1 id="第6章-查询性能优化"><a href="#第6章-查询性能优化" class="headerlink" title="第6章 查询性能优化"></a>第6章 查询性能优化</h1><a id="more"></a>
+
+<h2 id="6-1-为什么查询速度会慢"><a href="#6-1-为什么查询速度会慢" class="headerlink" title="6.1 为什么查询速度会慢"></a>6.1 为什么查询速度会慢</h2><p>如果把查询看作是一个任务，那么它由一系列子任务组成，每个子任务都会小号一定的时间。如果要优化查询，实际上要优化其子任务，要么消除其中一些子任务，要么减少子任务的执行次数，要么让子任务运行得更快。</p>
+<h2 id="6-2-慢查询基础：优化数据访问"><a href="#6-2-慢查询基础：优化数据访问" class="headerlink" title="6.2 慢查询基础：优化数据访问"></a>6.2 慢查询基础：优化数据访问</h2><p>查询性能低下最基本的原因是访问的数据太多。大部分性能底下的查询都可以通过减少访问的数据量的方式进行优化。对于低效的查询，通过下面两个步骤来分析总是很有效：</p>
+<ol>
+<li>确认应用程序是否在检索大量超过需要的数据。这通常意味着访问了太多的行或者列。</li>
+<li>确认MySQL服务器层是否在分析大量超过需要的数据行。</li>
+</ol>
+<h3 id="6-2-1-是否向数据库请求了不需要的数据"><a href="#6-2-1-是否向数据库请求了不需要的数据" class="headerlink" title="6.2.1 是否向数据库请求了不需要的数据"></a>6.2.1 是否向数据库请求了不需要的数据</h3><p>有些查询会请求超过实际需要的数据，然后这些多余的数据会被应用程序丢弃。这会给MySQL服务器带来额外的负担，并增加网络开销，另外也会消耗应用服务器的CPU和内存资源。</p>
+<h3 id="6-2-2-MySQL是否在扫描额外的记录"><a href="#6-2-2-MySQL是否在扫描额外的记录" class="headerlink" title="6.2.2 MySQL是否在扫描额外的记录"></a>6.2.2 MySQL是否在扫描额外的记录</h3><p>在确定查询只返回需要的数据以后，接下来应该看看查询为了返回结果是否扫描了过多的数据。</p>
+<p>对于MySQL，最简单的衡量查询开销的三个指标：</p>
+<ul>
+<li>响应时间</li>
+<li>扫描的行数</li>
+<li>返回的行数</li>
+</ul>
+<p>这三个指标都会记录到MySQL的慢日志中，所以检查慢日志记录时找出扫描行数过多的查询的好办法。</p>
+<p>响应时间时两个部分之和：服务时间和排队时间。</p>
+<p>在EXPLAIN语句中的type列反应了访问类型。访问类型有很多种，从全表扫描到索引扫描、范围扫描、唯一索引查询、常数引用等。速度从慢到快，扫描的行数从多到少。</p>
+<p>如果查询没有办法找到合适的访问类型，那么解决的最好办法通常就是增加一个合适的索引。索引让MySQL以最高效、扫描行数最少的方式找到需要的记录。好的索引可以让查询使用合适的访问类型，尽可能地只扫描需要的数据行。</p>
+<h2 id="6-3-重构查询的方式"><a href="#6-3-重构查询的方式" class="headerlink" title="6.3 重构查询的方式"></a>6.3 重构查询的方式</h2><h3 id="6-3-1-一个复杂查询还是多个简单查询"><a href="#6-3-1-一个复杂查询还是多个简单查询" class="headerlink" title="6.3.1 一个复杂查询还是多个简单查询"></a>6.3.1 一个复杂查询还是多个简单查询</h3><p>设计查询的时候一个需要考虑的重要问题是，是否需要将一个复杂的查询分成多个简单的查询。</p>
+<h3 id="6-3-2-切分查询"><a href="#6-3-2-切分查询" class="headerlink" title="6.3.2 切分查询"></a>6.3.2 切分查询</h3><p>有时候对于一个大查询我们需要“分而治之”，将大查询切分成小查询，每个查询功能完全一样，只完成一小部分，每次只返回一小部分查询结果。</p>
+<h3 id="6-3-3-分解关联查询"><a href="#6-3-3-分解关联查询" class="headerlink" title="6.3.3 分解关联查询"></a>6.3.3 分解关联查询</h3><p>用分解关联查询的方式重构查询有以下优势：</p>
+<ul>
+<li>让缓存的效率更高。</li>
+<li>执行单个查询可以减少锁的竞争。</li>
+<li>在应用层做关联，可以更容易对数据库进行拆分，更容易做到高性能和可扩展。</li>
+<li>查询本身效率也可能会有所提升。</li>
+<li>可以减少冗余记录的查询。</li>
+<li>相当于在应用中实现了哈希关联，而不是使用MySQL的嵌套循环关联。</li>
+</ul>
+<h2 id="6-4-查询执行的基础"><a href="#6-4-查询执行的基础" class="headerlink" title="6.4 查询执行的基础"></a>6.4 查询执行的基础</h2><p><img src="/images/mysql-search.jpg" alt="mysql-search.jpg"></p>
+<p><strong>查询执行路径：</strong></p>
+<ol>
+<li>客户端发送一条查询给服务器。</li>
+<li>服务器先检查查询缓存，如果命中了缓存，则立刻返回存储在缓存中的结果。否则进入下一阶段。</li>
+<li>服务器端进行SQL解析、预处理，再由优化器生成对应的执行计划。</li>
+<li>MySQL根据优化器生成的执行计划，调用存储引擎的API来执行查询。</li>
+<li>将结果返回给客户端。</li>
+</ol>
+<h3 id="6-4-1-MySQL客户端-服务端通信协议"><a href="#6-4-1-MySQL客户端-服务端通信协议" class="headerlink" title="6.4.1 MySQL客户端/服务端通信协议"></a>6.4.1 MySQL客户端/服务端通信协议</h3><p>MySQL客户端和服务器之间的通信协议是“半双工”的，这意味着，在任何一个时刻，要么是由服务器向客户端发送数据，要么是由客户端向服务器发送数据，这两个动作不能同时发生。</p>
+<p><strong>查询状态</strong></p>
+<p>对于一个MySQL连接，或者说一个线程，任何时刻都有一个状态，该状态表示了MySQL当前正在做什么。使用<code>SHOW FULL PROCESSLIST</code>命令查看当前的状态。在一个查询的生命周期，状态会变化很多次；</p>
+<ul>
+<li>Sleep: 线程正在等待客户端发送新的请求</li>
+<li>Query： 线程正在执行查询或者正在将结果发送给客户端</li>
+<li>Locked：在MySQL服务器层，该线程正在等待表锁。在存储引擎级别实现的锁，并不会体现在线程状态中。</li>
+<li>Analyzing and statistics: 线程正在收集存储引擎的统计信息，并生成查询的执行计划。</li>
+<li>Copying to tmp table [on disk]： 线程正在执行查询，并将其结果集都复制到一个临时表中，这种状态一般要么是在做GROUP BY操作，要么是文件排序操作，或者是UNION操作</li>
+<li>Sorting result: 线程正在对结果集进行排序。</li>
+<li>Sending data： 线程可能在多个状态之间传送数据，或者在生成结果集，或者在向客户端返回数据。</li>
+</ul>
+<h3 id="6-4-2-查询缓存-Query-Cache"><a href="#6-4-2-查询缓存-Query-Cache" class="headerlink" title="6.4.2 查询缓存(Query Cache)"></a>6.4.2 查询缓存(Query Cache)</h3><p>在解析一个查询语句之前，如果查询缓存时打开的，那么MySQL会优先检查这个查询是否命中查询缓存中的数据。这个检车时通过一个对大小写敏感的哈希查找实现的。</p>
+<p>如果当前查询命中了查询缓存，如果权限没有问题，mysql会跳过所有其他阶段，直接从缓存中拿到结果并返回给客户端。这种情况下，查询不会被解析，不用生成执行计划，不会被执行。</p>
+<h3 id="6-4-3-查询优化处理"><a href="#6-4-3-查询优化处理" class="headerlink" title="6.4.3 查询优化处理"></a>6.4.3 查询优化处理</h3><p>查询的生命周期的下一步是将一个SQL转换成一个执行计划，MySQL再依照这个执行计划和存储引起那个进行交互。这包括多个子阶段：解析SQL、预处理、优化SQL执行计划。这个过程中任何错误(例如语法错误)都可能终止查询。</p>
+<ul>
+<li>语法解析器和预处理</li>
+</ul>
+<p>MySQL通过关键字将SQL语句进行解析，并生成一棵对应的“解析树”。MySQL解析器将使用MySQL语法规则验证和解析查询。</p>
+<ul>
+<li>查询优化器</li>
+</ul>
+<p>语法树被认为是合法的了，并且由优化器将其转化成执行计划。一条查询可以有很多种执行方式，最后都返回相同的结果。优化器的作用就是找到这其中最好的执行计划。</p>
+<p>MySQL使用基于成本的优化器，它将尝试预测一个查询使用某种执行计划时的成本，并选择其中成本最小的一个。</p>
+<p>MySQL能够处理的优化类型</p>
+<blockquote>
+<ul>
+<li>重新定义关联表的顺序</li>
+<li>将外连接转化成内连接</li>
+<li>使用等价变换规则</li>
+<li>优化COUNT(), MIN()和MAX()</li>
+<li>预估并转化为常数表达式</li>
+<li>覆盖索引扫描</li>
+<li>子查询优化</li>
+<li>提前终止查询</li>
+<li>等值传播</li>
+<li>列表IN()的比较</li>
+</ul>
+</blockquote>
+<ul>
+<li>数据和索引的统计信息</li>
+</ul>
+<p>MySQL架构的多个层次之种，在服务器层有查询优化器，却没有保存数据和索引的统计信息。统计信息由存储引擎实现，不同的的存储引擎可能会存储不同的统计信息(也可以按照不同的格式存储统计信息)。</p>
+<p>因为服务层没有任何统计信息，所以MySQL查询优化器在生成查询的执行计划时，需要向存储迎请获取相应的统计信息。优化器根据这些信息选择一个最优的执行计划。</p>
+<ul>
+<li>MySQL如何执行关联查询</li>
+</ul>
+<p>MySQL任务任何一个查询都是一次“关联”—并不仅仅是一个查询需要到两个表匹配才叫关联，所以在MySQL中，每一个查询，每一个片段都可能是关联。</p>
+<ul>
+<li>执行计划</li>
+</ul>
+<p>和很多其他关系数据库不同，MySQL并不会生成查询字节码来执行查询。MySQL生成查询的一棵指令树，然后通过存储引擎执行完成这棵指令树并返回结果。最终的执行计划包含了重构查询的全部信息。</p>
+<p>MySQL的执行计划是一棵左侧深度优先的树。</p>
+<ul>
+<li>关联查询优化器</li>
+</ul>
+<p>MySQL优化器最重要的一部分就是关联查询优化，它决定了多个表关联式的顺序。通常多表关联的时候，可以有多种不同的关联顺序来获得相同的执行结果。关联查询优化器则通过评估不同顺序时的成本来选择一个代价最小的关联顺序。</p>
+<ul>
+<li>排序优化</li>
+</ul>
+<p>无论如何排序都是一个成本很高的操作，所以从性能角度考虑，应尽可能避免排序或者尽可能避免对大量数据进行排序。</p>
+<p>MySQL可以通过索引进行排序。当不能使用索引生成排序结果的时候，MySQL需要自己进行排序，如果数据量小则在内存中进行，如果数据量大则需要使用磁盘，不过MySQL将这个过程统一称为文件排序(filesort).</p>
+<h3 id="6-4-4-查询执行引擎"><a href="#6-4-4-查询执行引擎" class="headerlink" title="6.4.4 查询执行引擎"></a>6.4.4 查询执行引擎</h3><p>在解析和优化阶段，MySQL将生成查询对应的执行计划，MySQL的查询执行引擎则根据这个执行计划来完成整个查询。</p>
+<p>在根据执行计划逐步执行的过程中，有大量的操作需要通过调用存储引擎实现的接口来完成，这些接口也就是我们称为“handler API”的接口。查询中的每一个表由一个handler的实力表示。</p>
+<h3 id="6-4-5-返回结果给客户端"><a href="#6-4-5-返回结果给客户端" class="headerlink" title="6.4.5 返回结果给客户端"></a>6.4.5 返回结果给客户端</h3><h2 id="6-5-MySQL查询优化器的局限性"><a href="#6-5-MySQL查询优化器的局限性" class="headerlink" title="6.5 MySQL查询优化器的局限性"></a>6.5 MySQL查询优化器的局限性</h2><h2 id="6-6-查询优化器的提示-hint"><a href="#6-6-查询优化器的提示-hint" class="headerlink" title="6.6 查询优化器的提示(hint)"></a>6.6 查询优化器的提示(hint)</h2><p>如果对优化器选择的执行计划不满意，可以使用优化器提供的几个提示(hint)来控制最终的执行计划。</p>
+<h2 id="6-7-优化特定类型的查询"><a href="#6-7-优化特定类型的查询" class="headerlink" title="6.7 优化特定类型的查询"></a>6.7 优化特定类型的查询</h2>
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>Coffee? ☕</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/uploads/wechat-reward-image.png" alt="妖小灰 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/uploads/alipay-reward-image.png" alt="妖小灰 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/MySQL/" rel="tag"><i class="fa fa-tag"></i> MySQL</a>
+              <a href="/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" rel="tag"><i class="fa fa-tag"></i> 读书笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/06/%C2%B8%C3%9F%C3%90O%CC%82A%CC%88U%CC%88MySQL-%C2%B6A%CC%81E%CC%82e%CC%81%C2%B1E%CC%82%C2%BCC%CC%A72/" rel="prev" title="高性能MySQL-读书笔记2">
+      <i class="fa fa-chevron-left"></i> 高性能MySQL-读书笔记2
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/19/GO%20tutorial/" rel="next" title="Go Tutorial">
+      Go Tutorial <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8zMTk1MS84NTE1"></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC6%E7%AB%A0-%E6%9F%A5%E8%AF%A2%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96"><span class="nav-number">1.</span> <span class="nav-text">第6章 查询性能优化</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#6-1-%E4%B8%BA%E4%BB%80%E4%B9%88%E6%9F%A5%E8%AF%A2%E9%80%9F%E5%BA%A6%E4%BC%9A%E6%85%A2"><span class="nav-number">1.1.</span> <span class="nav-text">6.1 为什么查询速度会慢</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-2-%E6%85%A2%E6%9F%A5%E8%AF%A2%E5%9F%BA%E7%A1%80%EF%BC%9A%E4%BC%98%E5%8C%96%E6%95%B0%E6%8D%AE%E8%AE%BF%E9%97%AE"><span class="nav-number">1.2.</span> <span class="nav-text">6.2 慢查询基础：优化数据访问</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#6-2-1-%E6%98%AF%E5%90%A6%E5%90%91%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AF%B7%E6%B1%82%E4%BA%86%E4%B8%8D%E9%9C%80%E8%A6%81%E7%9A%84%E6%95%B0%E6%8D%AE"><span class="nav-number">1.2.1.</span> <span class="nav-text">6.2.1 是否向数据库请求了不需要的数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-2-2-MySQL%E6%98%AF%E5%90%A6%E5%9C%A8%E6%89%AB%E6%8F%8F%E9%A2%9D%E5%A4%96%E7%9A%84%E8%AE%B0%E5%BD%95"><span class="nav-number">1.2.2.</span> <span class="nav-text">6.2.2 MySQL是否在扫描额外的记录</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-3-%E9%87%8D%E6%9E%84%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%96%B9%E5%BC%8F"><span class="nav-number">1.3.</span> <span class="nav-text">6.3 重构查询的方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#6-3-1-%E4%B8%80%E4%B8%AA%E5%A4%8D%E6%9D%82%E6%9F%A5%E8%AF%A2%E8%BF%98%E6%98%AF%E5%A4%9A%E4%B8%AA%E7%AE%80%E5%8D%95%E6%9F%A5%E8%AF%A2"><span class="nav-number">1.3.1.</span> <span class="nav-text">6.3.1 一个复杂查询还是多个简单查询</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-3-2-%E5%88%87%E5%88%86%E6%9F%A5%E8%AF%A2"><span class="nav-number">1.3.2.</span> <span class="nav-text">6.3.2 切分查询</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-3-3-%E5%88%86%E8%A7%A3%E5%85%B3%E8%81%94%E6%9F%A5%E8%AF%A2"><span class="nav-number">1.3.3.</span> <span class="nav-text">6.3.3 分解关联查询</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-4-%E6%9F%A5%E8%AF%A2%E6%89%A7%E8%A1%8C%E7%9A%84%E5%9F%BA%E7%A1%80"><span class="nav-number">1.4.</span> <span class="nav-text">6.4 查询执行的基础</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#6-4-1-MySQL%E5%AE%A2%E6%88%B7%E7%AB%AF-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE"><span class="nav-number">1.4.1.</span> <span class="nav-text">6.4.1 MySQL客户端&#x2F;服务端通信协议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-4-2-%E6%9F%A5%E8%AF%A2%E7%BC%93%E5%AD%98-Query-Cache"><span class="nav-number">1.4.2.</span> <span class="nav-text">6.4.2 查询缓存(Query Cache)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-4-3-%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E5%A4%84%E7%90%86"><span class="nav-number">1.4.3.</span> <span class="nav-text">6.4.3 查询优化处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-4-4-%E6%9F%A5%E8%AF%A2%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E"><span class="nav-number">1.4.4.</span> <span class="nav-text">6.4.4 查询执行引擎</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-4-5-%E8%BF%94%E5%9B%9E%E7%BB%93%E6%9E%9C%E7%BB%99%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="nav-number">1.4.5.</span> <span class="nav-text">6.4.5 返回结果给客户端</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-5-MySQL%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E5%99%A8%E7%9A%84%E5%B1%80%E9%99%90%E6%80%A7"><span class="nav-number">1.5.</span> <span class="nav-text">6.5 MySQL查询优化器的局限性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-6-%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E5%99%A8%E7%9A%84%E6%8F%90%E7%A4%BA-hint"><span class="nav-number">1.6.</span> <span class="nav-text">6.6 查询优化器的提示(hint)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-7-%E4%BC%98%E5%8C%96%E7%89%B9%E5%AE%9A%E7%B1%BB%E5%9E%8B%E7%9A%84%E6%9F%A5%E8%AF%A2"><span class="nav-number">1.7.</span> <span class="nav-text">6.7 优化特定类型的查询</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="妖小灰"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">妖小灰</p>
+  <div class="site-description" itemprop="description">(╯‵□′)╯︵┻━┻.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">38</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">44</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Sun2yKid/" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Sun2yKid&#x2F;" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.facebook.com/zhonghua00700/" title="Facebook → https:&#x2F;&#x2F;www.facebook.com&#x2F;zhonghua00700&#x2F;" rel="noopener" target="_blank"><i class="fab fa-facebook fa-fw"></i>Facebook</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/1751826157/" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1751826157&#x2F;" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://zhonghua00700.lofter.com/" title="Lofter → http:&#x2F;&#x2F;zhonghua00700.lofter.com&#x2F;" rel="noopener" target="_blank"><i class="fab fa-camera fa-fw"></i>Lofter</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://docs.sun2y.me/" title="https:&#x2F;&#x2F;docs.sun2y.me&#x2F;" rel="noopener" target="_blank">Reading Notes</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.jianshu.com/u/0c026eae82a2" title="https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;0c026eae82a2" rel="noopener" target="_blank">Jianshu</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://ncov.sun2y.me/" title="http:&#x2F;&#x2F;ncov.sun2y.me&#x2F;" rel="noopener" target="_blank">2019nCoV</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">妖小灰</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

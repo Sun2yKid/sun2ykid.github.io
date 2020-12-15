@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Trebuchet MS:300,300italic,400,400italic,700,700italic|0.9:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"sun2y.me","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Linux&#x2F;UNIX系统编程手册 [德] Michael Kerrisk 第2章 基本概念第3章 系统编程概念">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux&#x2F;UNIX系统编程手册-基本概念">
+<meta property="og:url" content="http://sun2y.me/2020/01/09/Liunx%20UnixI%CC%88%C2%B5I%CC%81%C2%B3%C2%B1a%CC%80%C2%B3I%CC%80E%CC%82O%CC%88%C2%B2a%CC%81-%C2%BBu%CC%80%C2%B1%C2%BE%C2%B8A%CC%8AA%CC%88i%CC%82/index.html">
+<meta property="og:site_name" content="妖小灰">
+<meta property="og:description" content="Linux&#x2F;UNIX系统编程手册 [德] Michael Kerrisk 第2章 基本概念第3章 系统编程概念">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-01-09T06:42:08.000Z">
+<meta property="article:modified_time" content="2020-01-10T10:19:08.000Z">
+<meta property="article:author" content="妖小灰">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="笔记">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://sun2y.me/2020/01/09/Liunx%20UnixI%CC%88%C2%B5I%CC%81%C2%B3%C2%B1a%CC%80%C2%B3I%CC%80E%CC%82O%CC%88%C2%B2a%CC%81-%C2%BBu%CC%80%C2%B1%C2%BE%C2%B8A%CC%8AA%CC%88i%CC%82/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Linux/UNIX系统编程手册-基本概念 | 妖小灰</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-124173268-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-124173268-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?a5f08efba4fa4000554315eb2383dab4";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">妖小灰</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Never too late to learn.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://sun2y.me/2020/01/09/Liunx%20UnixI%CC%88%C2%B5I%CC%81%C2%B3%C2%B1a%CC%80%C2%B3I%CC%80E%CC%82O%CC%88%C2%B2a%CC%81-%C2%BBu%CC%80%C2%B1%C2%BE%C2%B8A%CC%8AA%CC%88i%CC%82/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="妖小灰">
+      <meta itemprop="description" content="(╯‵□′)╯︵┻━┻.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="妖小灰">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Linux/UNIX系统编程手册-基本概念
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-01-09 14:42:08" itemprop="dateCreated datePublished" datetime="2020-01-09T14:42:08+08:00">2020-01-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-01-10 18:19:08" itemprop="dateModified" datetime="2020-01-10T18:19:08+08:00">2020-01-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0/%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index"><span itemprop="name">技术</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><a target="_blank" rel="noopener" href="https://book.douban.com/subject/25809330/">Linux/UNIX系统编程手册</a></p>
+<p>[德] Michael Kerrisk</p>
+<p>第2章 基本概念<br>第3章 系统编程概念</p>
+<a id="more"></a>
+<h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><h3 id="内核"><a href="#内核" class="headerlink" title="内核"></a>内核</h3><h4 id="内核的职责：-Tasks-performed-by-the-kernel"><a href="#内核的职责：-Tasks-performed-by-the-kernel" class="headerlink" title="内核的职责：(Tasks performed by the kernel)"></a>内核的职责：(Tasks performed by the kernel)</h4><ul>
+<li>进程调度(Process scheduling)</li>
+<li>内存管理(Memory scheduling)</li>
+<li>提供了文件系统(Provision of a file system)</li>
+<li>创建和终止进程(Creation and termination of process)</li>
+<li>对设备的访问(Access to devices)</li>
+<li>联网(Networking)</li>
+<li>提供系统调用应用编程接口(Provision of a system call API)</li>
+</ul>
+<h4 id="内核态和用户态-Kernel-mode-and-user-mode"><a href="#内核态和用户态-Kernel-mode-and-user-mode" class="headerlink" title="内核态和用户态(Kernel mode and user mode)"></a>内核态和用户态(Kernel mode and user mode)</h4><p>现代处理器架构一般允许CPU至少在两种不同状态下运行，即：用户态和内核态(或supervisor mode)。执行硬件指令可使CPU在两种状态间来回切换。与之对应，可将虚拟内存区域划分为用户空间和内核空间。在用户态下运行时，CPU只能访问被标记为用户空间的内存；当运行于内核态时，CPU既可以访问用户空间内存，也能访问内核空间内存。</p>
+<h3 id="shell"><a href="#shell" class="headerlink" title="shell"></a>shell</h3><ul>
+<li>Bourne again shell(bash): GUN项目对Bourne shell(sh)的重新实现。</li>
+</ul>
+<h3 id="单根目录层级、目录、链接及文件"><a href="#单根目录层级、目录、链接及文件" class="headerlink" title="单根目录层级、目录、链接及文件"></a>单根目录层级、目录、链接及文件</h3><blockquote>
+<p>每个目录至少包含两条记录：<code>.</code>和<code>..</code>，前者时指向目录本身的链接，后者是指向其上级目录的链接。</p>
+</blockquote>
+<h3 id="文件I-O模型"><a href="#文件I-O模型" class="headerlink" title="文件I/O模型"></a>文件I/O模型</h3><p>UNIX系统I/O模型最为显著的特性之一是其I/O通用性概念。也就是说，同一套系统调用(open(), read(), write(), close()等)所执行的I/O操作，可用于所有文件类型，包括设备。   </p>
+<blockquote>
+<p>One of the distinguishing features of the I/O model on UNIX systems is the concept<br>of universality of I/O. This means that the same system calls (open(), read(),<br>30 Chapter 2<br>write(), close(), and so on) are used to perform I/O on all types of files, including<br>devices.</p>
+</blockquote>
+<p>I/O系统调用使用文件描述符(file descriptor)–数值很小的非负整数–来指代打开的文件。获取文件描述符的常用手法是调用open(),在参数中指定I/O操作目标文件的路径名。</p>
+<h3 id="进程-Process"><a href="#进程-Process" class="headerlink" title="进程(Process)"></a>进程(Process)</h3><p>进程是正在执行的程序实例。执行程序时，内核会将程序代码载入虚拟内存，为程序变量分配空间，建立bookkeeping数据结构，以记录与进程有关的各种信息(进程ID，用户ID，组ID以及终止状态)。<br>内核为各个进程分配计算机资源，在其生命周期内对进程的资源做统筹和调整，进程结束时，释放资源，供其他进程使用。</p>
+<h4 id="进程的内存布局-Process-memory-layout"><a href="#进程的内存布局-Process-memory-layout" class="headerlink" title="进程的内存布局(Process memory layout)"></a>进程的内存布局(Process memory layout)</h4><ul>
+<li>文本：程序的指令</li>
+<li>数据：程序使用的静态变量</li>
+<li>堆： 程序可从该区域动态分配额外内存</li>
+<li>栈：随函数调用、返回而增减的一片内存，用于为局部变量和函数调用链接信息分配存储空间</li>
+</ul>
+<h4 id="创建进程和执行进程"><a href="#创建进程和执行进程" class="headerlink" title="创建进程和执行进程"></a>创建进程和执行进程</h4><p>进程使用系统调用fork()来创建一个新进程。调用fork()的进程被称为父进程，新创建的进程被称为子进程。内核通过对父进程的复制来创建子进程。</p>
+<p>子进程可以使用系统调用execve()去加载并执行一个全新程序。execve()会销毁现有的文本段、数据段、栈、堆，并根据新程序的代码，创建新segments来替换他们。</p>
+<blockquote>
+<p>每一个进程都有一个唯一的整型进程标识符(PID), 以及一个父进程标识符(PPID).</p>
+</blockquote>
+<p>可使用两种方式来终止一个进程：</p>
+<ul>
+<li>其一，进程可使用_exit()系统调用，请求退出；</li>
+<li>其二，向进程传递信号，将其“杀死”；<br>无论以何种方式推出，进程都会生成“终止状态”，一个非负小整数，可供父进程的wait()系统调用检测。一般“终止状态”为0表示正常退出，非0表示有错误发生。</li>
+</ul>
+<h4 id="The-init-process"><a href="#The-init-process" class="headerlink" title="The init process"></a>The init process</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&gt; $ man init</span><br><span class="line">SYSTEMD(1)                                                                            </span><br><span class="line">NAME</span><br><span class="line">       systemd, init - systemd system and service manager</span><br><span class="line"></span><br><span class="line">SYNOPSIS</span><br><span class="line">       systemd [OPTIONS...]</span><br><span class="line"></span><br><span class="line">       init [OPTIONS...] &#123;COMMAND&#125;</span><br><span class="line"></span><br><span class="line">DESCRIPTION</span><br><span class="line">       systemd is a system and service manager for Linux operating systems. When run as first process on boot (as PID 1), it acts as init system that brings up and maintains userspace</span><br><span class="line">       services.</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="守护进程-Daemon-processes"><a href="#守护进程-Daemon-processes" class="headerlink" title="守护进程(Daemon processes)"></a>守护进程(Daemon processes)</h4><p>Examples of daemon processes include syslogd, which records messages in the system<br>log, and httpd, which serves web pages via the Hypertext Transfer Protocol<br>(HTTP).</p>
+<h4 id="环境列表-Environment-list"><a href="#环境列表-Environment-list" class="headerlink" title="环境列表(Environment list)"></a>环境列表(Environment list)</h4><p>每一个进程都有一份环境列表，即在进程用户空间内存中维护的一组环境变量。可使用<code>export</code>，<code>printenv</code>命令来创建和查看当前进程的环境变量。</p>
+<blockquote>
+<p>$ export [MYVAR=’Hello world’]</p>
+</blockquote>
+<blockquote>
+<p>$ printenv<br>使用<code>unset</code>，命令撤销一个环境变量</p>
+</blockquote>
+<h4 id="进程间通讯及同步-Interprocess-Communication-and-Synchronization"><a href="#进程间通讯及同步-Interprocess-Communication-and-Synchronization" class="headerlink" title="进程间通讯及同步(Interprocess Communication and Synchronization)"></a>进程间通讯及同步(Interprocess Communication and Synchronization)</h4><p>Linux提供了丰富的进程间通讯(IPC)机制：</p>
+<ul>
+<li>信号(signal), 表示事件的发生；</li>
+<li>管道(pipes)和FIFO, 用于在进程间传递数据；</li>
+<li>套接字(sockets), 供同一主机或联网的不同主机所运行的进程之间传递数据；</li>
+<li>文件锁定(file locking), 为防止其他进程读取或更新文件内容，允许某进程对文件的部分区域加以锁定；</li>
+<li>消息队列(message queues), 用于进程间交换信息(数据报)；</li>
+<li>信号量(semaphore), 用来同步进程动作；</li>
+<li>共享内存(shared memory), 允许两个或以上进程共享一块内存；</li>
+</ul>
+<h3 id="信号-Signals"><a href="#信号-Signals" class="headerlink" title="信号(Signals)"></a>信号(Signals)</h3><p>信号也常被称为“软件中断”。进程收到信号，就意味着某个事件或者异常情况发生。信号有很多类型，分别表示不同的事件和情况。每种信号类型通过不同的整数加上SIGxxx来标识自己。<br>内核、其他进程或者进程自身均可向进程发送信号。<br>内核向进程发送信号：</p>
+<ul>
+<li>用户键入中断字符(ctrl + c)</li>
+<li>进程的子进程之一终止</li>
+<li>进程设定的定时器通知</li>
+<li>进程尝试访问无效内存地址<br>shell中，可使用kill命令向进程发送信号。在程序内部，系统调用kill()可提供相同的功能。<br>信号从产生到送达进程期间，一直处于挂起(pending)状态。通常，系统会在接收进程下次获得调度时，将处于挂起状态的信号同时送达，如果进程正在运行，则立即送达。</li>
+</ul>
+<h3 id="线程-Threads"><a href="#线程-Threads" class="headerlink" title="线程(Threads)"></a>线程(Threads)</h3><p>每一个进程都可以执行多个线程。可将线程想象为共享同一虚拟内存及一些其他属性的进程。每个线程都会执行相同的程序代码，共享同一数据区域和堆。可是每个线程都有自己的栈，用来装载本地变量和函数调用链接信息。<br>线程之间可以通过共享的全局变量进行通讯。<br>多线程应用能从多处理器硬件的并行处理中获益匪浅。</p>
+<h3 id="进程组和shell任务控制-Process-Group-and-Shell-Job-Control"><a href="#进程组和shell任务控制-Process-Group-and-Shell-Job-Control" class="headerlink" title="进程组和shell任务控制(Process Group and Shell Job Control)"></a>进程组和shell任务控制(Process Group and Shell Job Control)</h3><p>shell执行的每个程序都创建一个新进程。例如，shell创建了3个进程来执行一下管道命令</p>
+<blockquote>
+<p>&amp; ls -l | sort -k5n | less</p>
+</blockquote>
+<p>主流的shell都提供了一种交互式特性，名为任务控制。shell会将管道内的所有进程置于一个新进程组或任务中，进程组都具有相同的进程组标识符(某个进程的进程ID)。</p>
+<h4 id="proc文件系统"><a href="#proc文件系统" class="headerlink" title="/proc文件系统"></a>/proc文件系统</h4><p>/proc文件系统时一种虚拟文件系统，以文件系统目录和文件形式，提供一个指向内核数据结构的接口。这位查看和改变各种系统属性开启了方便之门。此外，还能通过一组以/proc/PID形式命名的目录查看系统中运行各行程的相关信息。</p>
+<h2 id="系统编程概念"><a href="#系统编程概念" class="headerlink" title="系统编程概念"></a>系统编程概念</h2><h3 id="系统调用-system-call"><a href="#系统调用-system-call" class="headerlink" title="系统调用(system call)"></a>系统调用(system call)</h3><p>系统调用允许进程向内和请求服务。与用户空间的函数调用相比，哪怕是最简单的系统调用都会产生显著的开销，其原因时为了执行系统调用，系统需要临时性的切换到内核态。此外，内核还需验证系统调用的参数、用户内存和内核内存之间也有数据需要传递。</p>
+<p>在Linux上，一般情况下，使用glibc作为C语言标准库的实现。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>Coffee? ☕</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/uploads/wechat-reward-image.png" alt="妖小灰 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/uploads/alipay-reward-image.png" alt="妖小灰 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/Linux/" rel="tag"><i class="fa fa-tag"></i> Linux</a>
+              <a href="/tags/%E7%AC%94%E8%AE%B0/" rel="tag"><i class="fa fa-tag"></i> 笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/01/09/TCP-IP-I%CC%88e%CC%82%C2%BDa%CC%82-%C2%BEi%CC%811-%C3%90%C2%ADO%CC%80e%CC%81-N%CC%83%C2%A7I%CC%88%C2%B0%C2%B1E%CC%82%C2%BCC%CC%A7/" rel="prev" title="TCP IP 详解 卷1:协议 学习笔记">
+      <i class="fa fa-chevron-left"></i> TCP IP 详解 卷1:协议 学习笔记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/01/10/Liunx%20UnixI%CC%88%C2%B5I%CC%81%C2%B3%C2%B1a%CC%80%C2%B3I%CC%80E%CC%82O%CC%88%C2%B2a%CC%81-I%CC%82A%CC%88%C2%BC%C3%BEIO/" rel="next" title="Linux/UNIX系统编程手册-文件IO">
+      Linux/UNIX系统编程手册-文件IO <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8zMTk1MS84NTE1"></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E6%A0%B8"><span class="nav-number">1.1.</span> <span class="nav-text">内核</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E6%A0%B8%E7%9A%84%E8%81%8C%E8%B4%A3%EF%BC%9A-Tasks-performed-by-the-kernel"><span class="nav-number">1.1.1.</span> <span class="nav-text">内核的职责：(Tasks performed by the kernel)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E6%A0%B8%E6%80%81%E5%92%8C%E7%94%A8%E6%88%B7%E6%80%81-Kernel-mode-and-user-mode"><span class="nav-number">1.1.2.</span> <span class="nav-text">内核态和用户态(Kernel mode and user mode)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#shell"><span class="nav-number">1.2.</span> <span class="nav-text">shell</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E6%A0%B9%E7%9B%AE%E5%BD%95%E5%B1%82%E7%BA%A7%E3%80%81%E7%9B%AE%E5%BD%95%E3%80%81%E9%93%BE%E6%8E%A5%E5%8F%8A%E6%96%87%E4%BB%B6"><span class="nav-number">1.3.</span> <span class="nav-text">单根目录层级、目录、链接及文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E4%BB%B6I-O%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.4.</span> <span class="nav-text">文件I&#x2F;O模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B-Process"><span class="nav-number">1.5.</span> <span class="nav-text">进程(Process)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E7%9A%84%E5%86%85%E5%AD%98%E5%B8%83%E5%B1%80-Process-memory-layout"><span class="nav-number">1.5.1.</span> <span class="nav-text">进程的内存布局(Process memory layout)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E8%BF%9B%E7%A8%8B%E5%92%8C%E6%89%A7%E8%A1%8C%E8%BF%9B%E7%A8%8B"><span class="nav-number">1.5.2.</span> <span class="nav-text">创建进程和执行进程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#The-init-process"><span class="nav-number">1.5.3.</span> <span class="nav-text">The init process</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%88%E6%8A%A4%E8%BF%9B%E7%A8%8B-Daemon-processes"><span class="nav-number">1.5.4.</span> <span class="nav-text">守护进程(Daemon processes)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E5%88%97%E8%A1%A8-Environment-list"><span class="nav-number">1.5.5.</span> <span class="nav-text">环境列表(Environment list)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E9%97%B4%E9%80%9A%E8%AE%AF%E5%8F%8A%E5%90%8C%E6%AD%A5-Interprocess-Communication-and-Synchronization"><span class="nav-number">1.5.6.</span> <span class="nav-text">进程间通讯及同步(Interprocess Communication and Synchronization)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%A1%E5%8F%B7-Signals"><span class="nav-number">1.6.</span> <span class="nav-text">信号(Signals)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B-Threads"><span class="nav-number">1.7.</span> <span class="nav-text">线程(Threads)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E7%BB%84%E5%92%8Cshell%E4%BB%BB%E5%8A%A1%E6%8E%A7%E5%88%B6-Process-Group-and-Shell-Job-Control"><span class="nav-number">1.8.</span> <span class="nav-text">进程组和shell任务控制(Process Group and Shell Job Control)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#proc%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="nav-number">1.8.1.</span> <span class="nav-text">&#x2F;proc文件系统</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E7%BC%96%E7%A8%8B%E6%A6%82%E5%BF%B5"><span class="nav-number">2.</span> <span class="nav-text">系统编程概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8-system-call"><span class="nav-number">2.1.</span> <span class="nav-text">系统调用(system call)</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="妖小灰"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">妖小灰</p>
+  <div class="site-description" itemprop="description">(╯‵□′)╯︵┻━┻.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">38</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">44</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Sun2yKid/" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Sun2yKid&#x2F;" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.facebook.com/zhonghua00700/" title="Facebook → https:&#x2F;&#x2F;www.facebook.com&#x2F;zhonghua00700&#x2F;" rel="noopener" target="_blank"><i class="fab fa-facebook fa-fw"></i>Facebook</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/1751826157/" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1751826157&#x2F;" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://zhonghua00700.lofter.com/" title="Lofter → http:&#x2F;&#x2F;zhonghua00700.lofter.com&#x2F;" rel="noopener" target="_blank"><i class="fab fa-camera fa-fw"></i>Lofter</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://docs.sun2y.me/" title="https:&#x2F;&#x2F;docs.sun2y.me&#x2F;" rel="noopener" target="_blank">Reading Notes</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.jianshu.com/u/0c026eae82a2" title="https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;0c026eae82a2" rel="noopener" target="_blank">Jianshu</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://ncov.sun2y.me/" title="http:&#x2F;&#x2F;ncov.sun2y.me&#x2F;" rel="noopener" target="_blank">2019nCoV</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">妖小灰</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Trebuchet MS:300,300italic,400,400italic,700,700italic|0.9:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"sun2y.me","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="高性能MySQL第三版 [美] Baron Scbwartz, Peter Zaitsev, Vadim Tkacbenko 第5章 创建高性能的索引">
+<meta property="og:type" content="article">
+<meta property="og:title" content="高性能MySQL-读书笔记2">
+<meta property="og:url" content="http://sun2y.me/2020/03/06/%C2%B8%C3%9F%C3%90O%CC%82A%CC%88U%CC%88MySQL-%C2%B6A%CC%81E%CC%82e%CC%81%C2%B1E%CC%82%C2%BCC%CC%A72/index.html">
+<meta property="og:site_name" content="妖小灰">
+<meta property="og:description" content="高性能MySQL第三版 [美] Baron Scbwartz, Peter Zaitsev, Vadim Tkacbenko 第5章 创建高性能的索引">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://sun2y.me/images/mysql-btree.jpg">
+<meta property="og:image" content="http://sun2y.me/images/mysql-index.jpg">
+<meta property="article:published_time" content="2020-03-06T12:15:52.000Z">
+<meta property="article:modified_time" content="2020-03-10T05:49:00.000Z">
+<meta property="article:author" content="妖小灰">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="读书笔记">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://sun2y.me/images/mysql-btree.jpg">
+
+<link rel="canonical" href="http://sun2y.me/2020/03/06/%C2%B8%C3%9F%C3%90O%CC%82A%CC%88U%CC%88MySQL-%C2%B6A%CC%81E%CC%82e%CC%81%C2%B1E%CC%82%C2%BCC%CC%A72/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>高性能MySQL-读书笔记2 | 妖小灰</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-124173268-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-124173268-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?a5f08efba4fa4000554315eb2383dab4";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">妖小灰</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Never too late to learn.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://sun2y.me/2020/03/06/%C2%B8%C3%9F%C3%90O%CC%82A%CC%88U%CC%88MySQL-%C2%B6A%CC%81E%CC%82e%CC%81%C2%B1E%CC%82%C2%BCC%CC%A72/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="妖小灰">
+      <meta itemprop="description" content="(╯‵□′)╯︵┻━┻.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="妖小灰">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          高性能MySQL-读书笔记2
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-03-06 20:15:52" itemprop="dateCreated datePublished" datetime="2020-03-06T20:15:52+08:00">2020-03-06</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-03-10 13:49:00" itemprop="dateModified" datetime="2020-03-10T13:49:00+08:00">2020-03-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index"><span itemprop="name">技术</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><a target="_blank" rel="noopener" href="https://book.douban.com/subject/23008813/">高性能MySQL第三版</a></p>
+<p>[美] Baron Scbwartz, Peter Zaitsev, Vadim Tkacbenko</p>
+<h1 id="第5章-创建高性能的索引"><a href="#第5章-创建高性能的索引" class="headerlink" title="第5章 创建高性能的索引"></a>第5章 创建高性能的索引</h1><a id="more"></a>
+
+<p>索引(MySQL中也叫‘键Key’)是存储引擎用于快速找到记录的一种数据结构。</p>
+<p>索引可以包含一个或多个列的值。如果索引包含多个列，那么列的顺序也十分重要，因为MySQL只能高效地使用索引的最左前缀列。</p>
+<h2 id="5-1-索引基础"><a href="#5-1-索引基础" class="headerlink" title="5.1 索引基础"></a>5.1 索引基础</h2><h3 id="5-1-1-索引的类型"><a href="#5-1-1-索引的类型" class="headerlink" title="5.1.1 索引的类型"></a>5.1.1 索引的类型</h3><p>在MySQL中，索引是存储在引擎层而不是服务器层实现的。不同存储引擎的索引的工作方式并不一样，也不是所有的存储引擎都支持所有类型的索引。即使多个存储引擎支持同一种类型的索引，其底层实现也可能不同。</p>
+<ul>
+<li>B-Tree索引</li>
+</ul>
+<blockquote>
+<p>很多存储引擎使用的是B+Tree，即每一个叶子节点都包含指向下一个叶子节点的指针，从而方便叶子节点的范围遍历。</p>
+</blockquote>
+<p>InnoDB使用B+Tree</p>
+<p>存储引擎以不同方式使用B-Tree索引，性能也各不同。例如，MyISAM使用前缀压缩技术使得索引更小，但InnoDB则按照原数据格式进行存储。再如MyISAM索引通过数据的物理位置引用被索引的行，而InnoDB则根据主键引用被索引的行。</p>
+<p>B-Tree通常意味着所有的值都是按顺序存储的，并且每个叶子页到根的距离相同。</p>
+<p><img src="/images/mysql-btree.jpg" alt="mysql-btree.jpg"></p>
+<p>B-Tree索引能够加快访问数据的速度，因为存储引擎不再需要进行全表扫描来获取需要的数据，取而代之的是从索引的根节点开始进行搜素。根节点的槽中存放了指向子节点的指针，存储引擎根据这些指针向下层查找。通过比较节点页的值和要查找的值可以找到合适的指针进入下层子节点，这些指针实际上定义了子节点页中值的上限和下限。最终存储引擎要么是找到对应的值，要么该记录不存在。</p>
+<p>叶子节点比较特别，他们的指针指向的是被索引的数据，而不是其它的节点页。树的深度和表的大小直接相关。</p>
+<p>B-Tree对索引列是顺序组织存储的，所以很适合查找范围数据。B-Tree索引适用于全键值、键值范围或键前缀查找。其中键前缀查找只适用于根据最左前缀的查找。</p>
+<p>B-Tree索引的限制：</p>
+<blockquote>
+<ul>
+<li>如果不是按照索引的最左列开始查找，则无法使用索引。</li>
+<li>不能跳过索引中的列。</li>
+<li>如果查询中某个列的范围查询，则其右边所有列都无法使用索引优化查询。</li>
+</ul>
+</blockquote>
+<p>因此，索引的顺序很重要，这些限制都和索引的顺序有关。</p>
+<ul>
+<li>哈希索引(hash index)</li>
+</ul>
+<p>哈希索引基于哈希表实现，只有精确匹配索引所有列的查询才有效。</p>
+<p>在MySQL中，只有Memory引擎显式支持哈希索引，且支持非唯一哈希索引。如果多个列的哈希值相同，索引会以链表的方式存放多个记录指针到同一个哈希条目中。</p>
+<p>哈希索引的限制：</p>
+<blockquote>
+<ul>
+<li>哈希索引只包含哈希值和行指针，而不存储字段值，所以不能使用索引中的值来避免读取行。</li>
+<li>哈希索引数据并不是按照索引值顺序存储的 ，无法用于排序。</li>
+<li>哈希索引也不支持部分索引列匹配查询。</li>
+<li>哈希索引只支持等值比较查询。</li>
+<li>出现哈希冲突时，存储引擎必须遍历链表中所有的行指针，逐行进行比较。</li>
+<li>哈希冲突很多的话，一些索引维护操作的代价也会很高。</li>
+</ul>
+</blockquote>
+<p>InnoDB引擎有一个特殊的功能叫做“自适应哈希索引(adaptive hash index)”。当InnoDB注意到某些索引值被使用得非常频繁时，他会在内存中基于B-Tree索引之上再创建一个哈希索引，这样就让B-Tree索引也具有哈希索引的一些优点，比如快速的哈希查找。</p>
+<blockquote>
+<p>思路：再B-Tree基础上创建一个伪哈希索引。这和真正的哈希索引不是一回事，因为还是使用B-Tree进行查找，但是它使用哈希值而不是键本身进行索引查找。你需要做的就是在查询的where子句中手动指定使用哈希函数。</p>
+</blockquote>
+<ul>
+<li><p>空间数据索引(R-Tree)<br>MyISAM表支持空间索引，可以用作地理数据存储。空间索引会从所有维度来索引数据。查询时，可以有效地使用任意维度来组合查询。</p>
+</li>
+<li><p>全文索引<br>全文索引是一种特殊类型的索引，它查找的时文本中的关键词，而不是直接比较索引中的值。全文索引更类似于搜索引擎做的事情，而不是简单的where条件匹配。全文索引适用于match against操作。</p>
+</li>
+</ul>
+<h2 id="5-2-索引的优点"><a href="#5-2-索引的优点" class="headerlink" title="5.2 索引的优点"></a>5.2 索引的优点</h2><p>索引可以让服务器快速地定位到表的指定位置，根聚索引的数据结构不同，索引页有一些其它的附加作用。例如B-Tree索引，按照顺序存储数据，所以MySQL可以用来做order by和group by操作。因为数据时有序的，所以B-Tree也就会将相关的列值都存储在一起。最后因为索引中存储了实际的列值，所以某些查询只使用索引就能够完成全部查询。</p>
+<p>索引的三个优点：</p>
+<blockquote>
+<ul>
+<li><ol>
+<li>索引大大减少了服务器需要扫描的数据量。</li>
+</ol>
+</li>
+<li><ol start="2">
+<li>索引可以帮助服务器避免排序和临时表。</li>
+</ol>
+</li>
+<li><ol start="3">
+<li>索引可以将随机I/O变为顺序I/O.</li>
+</ol>
+</li>
+</ul>
+</blockquote>
+<p>索引推荐的书籍，<em>Relational Database Index Design and the Optimizers(Wiley出版社)</em>, 由Tapio Lahdenmaki和Mike Leach编写。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">如何评价一个索引是否适合某个查询的“三星系统”(three-star system)</span><br><span class="line">* 索引将相关的记录放到一起则获得一星；</span><br><span class="line">* 如果索引中的数据顺序和查找中的排列顺序一致则获得二星；</span><br><span class="line">* 如果索引中的列包含了查询中需要的全部列则获得“三星”；</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-3-高性能的索引策略"><a href="#5-3-高性能的索引策略" class="headerlink" title="5.3 高性能的索引策略"></a>5.3 高性能的索引策略</h2><p>正确的创建和使用索引是实现高性能查询的基础。</p>
+<h3 id="5-3-1-独立的列"><a href="#5-3-1-独立的列" class="headerlink" title="5.3.1 独立的列"></a>5.3.1 独立的列</h3><p>“独立的列”是指索引列不能是表达式的一部分，也不能是函数的参数。</p>
+<h3 id="5-3-2-前缀索引和索引选择性"><a href="#5-3-2-前缀索引和索引选择性" class="headerlink" title="5.3.2 前缀索引和索引选择性"></a>5.3.2 前缀索引和索引选择性</h3><p>索引的选择性：不重复的索引值(也称为基数, cardinality)和数据表的记录总数(#T)的比值，范围从1/#T到1之间。索引的选择性越高则查询效率越高，因为选择性高的索引可以让MySQL在查找时过滤掉更多的行。唯一索引的选择性是1。</p>
+<p>对于BLOB、TEXT或者很长的VARCHAR类型的列，必须使用前缀索引，因为MySQL不允许所以额这些列的完整长度。诀窍在于要选择足够长的前缀以保证较高的选择性，同时又不能太长。即：前缀的“基数”应该接近于完整列的“基数”。</p>
+<p>前缀索引是一种能使索引更小、更快的有效办法，单另一方面也有其缺点：MySQL无法使用前缀索引做order by和group by，也无法使用前缀索引做覆盖扫描。</p>
+<h3 id="5-3-3-多列索引"><a href="#5-3-3-多列索引" class="headerlink" title="5.3.3 多列索引"></a>5.3.3 多列索引</h3><p>在多个列上建立独立的单列索引大部分情况下并不能提高MySQL的查询性能。MySQL5.0和更新版本引入了一种叫“索引合并”(index merge)的策略，一定程度上可以使用表上的多个单列索引来定位指定的行。</p>
+<p>索引合并策略有时候是一种优化的结果，但实际上更多时候说明了表上的索引建的很糟糕。如果在explain中看到有索引合并，应该好好检查一下查询和表的结构，看是不是已经是最优的。也可以通过参数optimizer_switch来关闭索引合并功能。也可以使用IGNORE INDEX提示让优化器忽略掉某些索引。</p>
+<h3 id="5-3-4-选择合适的索引列顺序"><a href="#5-3-4-选择合适的索引列顺序" class="headerlink" title="5.3.4 选择合适的索引列顺序"></a>5.3.4 选择合适的索引列顺序</h3><p>正确的顺序依赖于使用该索引的查询，并且同时需要考虑如何更好地满足排序和分组的需要。</p>
+<p>在一个多列B-Tree索引中，索引列的顺序意味着索引首先按照最左列进行排序，其次是第二列，等等。</p>
+<blockquote>
+<p>对于如何选择索引的列顺序有一个经验法则：将选择性最高的列放到索引最前列。这个建议在某些场景可能有帮助，但通常不如<strong>避免随机IO和排序</strong>那么重要。</p>
+</blockquote>
+<p>当不需要考虑排序和分组时，将选择性最高的列放在前面通常是很好的。这时候索引的作用只是用于优化where条件的查询。然而，性能不只是依赖于所有索引列的选择性(整体基数)，也和查询条件的具体值有关，也就是和值得分布有关。</p>
+<h3 id="5-3-5-聚簇索引"><a href="#5-3-5-聚簇索引" class="headerlink" title="5.3.5 聚簇索引"></a>5.3.5 聚簇索引</h3><p>聚簇索引并不是一种单独的索引类型，而是一种数据<strong>存储方式</strong>。</p>
+<p>InnoDB的聚簇索引实际上在同一个结构中保存了B-Tree索引和数据行。</p>
+<p>当表有聚簇索引时，它的数据行实际上存放在索引的叶子页(leaf page)中。术语“聚簇”表示数据行和相邻的键值紧凑地存储在一起。因为无法同时把数据行存放在两个不同的地方，所以一个表只能有一个聚簇索引。</p>
+<p><img src="/images/mysql-index.jpg" alt="mysql-index.jpg"></p>
+<p>InnoDB通过主键聚集数据，如果没有定义主键，InnoDB会选择一个唯一的非空索引代替。如果没有这样的索引，InnoDB会隐式定义一个主键来作为聚簇索引。</p>
+<p>聚簇索引有一些重要的优点：</p>
+<blockquote>
+<ul>
+<li>可以把相关数据保存在一起。</li>
+<li>数据访问更快。</li>
+<li>使用覆盖索引扫描的查询可以直接使用叶结点中的主键值。</li>
+</ul>
+</blockquote>
+<p>缺点：</p>
+<blockquote>
+<ul>
+<li>局促数据最大限度地提高了I/O密集型应用的性能，但如果数据全部都放在内存中，则访问的顺序就没有那么重要了。</li>
+<li>插入速度严重依赖于插入顺序。</li>
+<li>更新聚簇索引列的代价很高。</li>
+<li>基于聚簇索引的表再插入新行，或者逐渐被更新导致需要移动行的时候，可能面临“页分裂(page split)”的问题。页分裂会导致表占用更多的磁盘空间。</li>
+<li>聚簇索引可能导致全表扫描变慢，尤其是行比较稀疏，或者由于页分裂导致数据存储不连续的时候。</li>
+<li>二级索引(非聚簇索引)可能比想象的要更大，因为在二级索引的叶子节点包含了引用行的主键列。</li>
+<li>二级索引访问需要两次索引查找，而不是一次。因为二级索引叶子节点保存的不是指向行的物理位置的指针，而是行的主键值。</li>
+</ul>
+</blockquote>
+<h3 id="5-3-6-覆盖索引"><a href="#5-3-6-覆盖索引" class="headerlink" title="5.3.6 覆盖索引"></a>5.3.6 覆盖索引</h3><p>如果一个索引包含(或者说覆盖)所有需要查询的字段的值，我们成之为“覆盖索引”。</p>
+<p>不是所有类型的索引都可以成为覆盖索引。覆盖索引必须要存储索引列的值，而哈希索引、空间索引和全文索引等都不存储索引列的值，所以MySQL只能使用B-Tree索引做覆盖索引。</p>
+<h3 id="5-3-7-使用索引扫描来做排序"><a href="#5-3-7-使用索引扫描来做排序" class="headerlink" title="5.3.7 使用索引扫描来做排序"></a>5.3.7 使用索引扫描来做排序</h3><p>MySQL有两种方式可以生成有序的结果：通过排序操作；或者按索引顺序扫描；如果EXPLAIN出来的type列的值为“index”，则说明MySQL使用了所以索引扫描来做排序。</p>
+<h3 id="5-3-8-压缩-前缀压缩-索引"><a href="#5-3-8-压缩-前缀压缩-索引" class="headerlink" title="5.3.8 压缩(前缀压缩)索引"></a>5.3.8 压缩(前缀压缩)索引</h3><p>MyISAM使用前缀压缩来减少索引的大小，从而让更多的索引可以放入内存中，这在某些情况下能极大地提高性能。</p>
+<h3 id="5-3-9-冗余和重复索引"><a href="#5-3-9-冗余和重复索引" class="headerlink" title="5.3.9 冗余和重复索引"></a>5.3.9 冗余和重复索引</h3><p>重复索引是指在相同的列上按照相同的顺序创建的相同类型的索引。应该避免这样创建重复索引，发现以后也应该立即一处。</p>
+<p>冗余索引和重复索引有一些不同。如果创建了索引(A, B)，再创建索引(A)就是冗余索引，因为这只是前一个索引的前缀索引。冗余索引通常发生在为表添加新索引的时候。</p>
+<h3 id="5-3-10-未使用的索引"><a href="#5-3-10-未使用的索引" class="headerlink" title="5.3.10 未使用的索引"></a>5.3.10 未使用的索引</h3><h3 id="5-3-11-索引和锁"><a href="#5-3-11-索引和锁" class="headerlink" title="5.3.11 索引和锁"></a>5.3.11 索引和锁</h3><p>索引可以让查询锁定更少的行，这对性能有好处。首先，虽然InnoDB的行锁效率很高，内存使用也很少，但是锁定行的时候仍然会带来额外开销；其次，锁定超过需要的行会增加锁争用并减少并发性。</p>
+<h2 id="5-5-维护索引和表"><a href="#5-5-维护索引和表" class="headerlink" title="5.5 维护索引和表"></a>5.5 维护索引和表</h2><p>即使使用正确的类型创建了表并加上了合适的索引，工作也没有结束：还需要维护表和索引来确保他们都能正常工作。维护表有三个主要的目的：找到并修复损坏的表，维护准确的索引统计信息，减少碎片。</p>
+<h3 id="5-5-1-找到并修复损坏的表-corruption"><a href="#5-5-1-找到并修复损坏的表-corruption" class="headerlink" title="5.5.1 找到并修复损坏的表(corruption)"></a>5.5.1 找到并修复损坏的表(corruption)</h3><h3 id="5-5-2-更新索引统计信息"><a href="#5-5-2-更新索引统计信息" class="headerlink" title="5.5.2 更新索引统计信息"></a>5.5.2 更新索引统计信息</h3><h3 id="5-5-3-减少索引和数据的碎片"><a href="#5-5-3-减少索引和数据的碎片" class="headerlink" title="5.5.3 减少索引和数据的碎片"></a>5.5.3 减少索引和数据的碎片</h3><h2 id="5-6-总结"><a href="#5-6-总结" class="headerlink" title="5.6 总结"></a>5.6 总结</h2><p>在选择索引和编写利用这些索引的查询时，有如下三个原则始终记住：</p>
+<ul>
+<li><ol>
+<li>单行访问是很慢的。</li>
+</ol>
+</li>
+<li><ol start="2">
+<li>按顺序访问范围数据是很快的。</li>
+</ol>
+</li>
+<li><ol start="3">
+<li>索引覆盖查询时很快的。</li>
+</ol>
+</li>
+</ul>
+<p>总的来说，编写查询语句时应该尽可能选择合适的索引以避免单行查询、尽可能地使用数据原生顺序从而避免额外的排序操作，并尽可能使用索引覆盖查询。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>Coffee? ☕</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/uploads/wechat-reward-image.png" alt="妖小灰 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/uploads/alipay-reward-image.png" alt="妖小灰 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/MySQL/" rel="tag"><i class="fa fa-tag"></i> MySQL</a>
+              <a href="/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" rel="tag"><i class="fa fa-tag"></i> 读书笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/05/%C2%B8%C3%9F%C3%90O%CC%82A%CC%88U%CC%88MySQL-%C2%B6A%CC%81E%CC%82e%CC%81%C2%B1E%CC%82%C2%BCC%CC%A71/" rel="prev" title="高性能MySQL-读书笔记1">
+      <i class="fa fa-chevron-left"></i> 高性能MySQL-读书笔记1
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/07/%C2%B8%C3%9F%C3%90O%CC%82A%CC%88U%CC%88MySQL-%C2%B6A%CC%81E%CC%82e%CC%81%C2%B1E%CC%82%C2%BCC%CC%A73/" rel="next" title="高性能MySQL-读书笔记3">
+      高性能MySQL-读书笔记3 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8zMTk1MS84NTE1"></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC5%E7%AB%A0-%E5%88%9B%E5%BB%BA%E9%AB%98%E6%80%A7%E8%83%BD%E7%9A%84%E7%B4%A2%E5%BC%95"><span class="nav-number">1.</span> <span class="nav-text">第5章 创建高性能的索引</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#5-1-%E7%B4%A2%E5%BC%95%E5%9F%BA%E7%A1%80"><span class="nav-number">1.1.</span> <span class="nav-text">5.1 索引基础</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-1-%E7%B4%A2%E5%BC%95%E7%9A%84%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.1.1.</span> <span class="nav-text">5.1.1 索引的类型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-2-%E7%B4%A2%E5%BC%95%E7%9A%84%E4%BC%98%E7%82%B9"><span class="nav-number">1.2.</span> <span class="nav-text">5.2 索引的优点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-3-%E9%AB%98%E6%80%A7%E8%83%BD%E7%9A%84%E7%B4%A2%E5%BC%95%E7%AD%96%E7%95%A5"><span class="nav-number">1.3.</span> <span class="nav-text">5.3 高性能的索引策略</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-1-%E7%8B%AC%E7%AB%8B%E7%9A%84%E5%88%97"><span class="nav-number">1.3.1.</span> <span class="nav-text">5.3.1 独立的列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-2-%E5%89%8D%E7%BC%80%E7%B4%A2%E5%BC%95%E5%92%8C%E7%B4%A2%E5%BC%95%E9%80%89%E6%8B%A9%E6%80%A7"><span class="nav-number">1.3.2.</span> <span class="nav-text">5.3.2 前缀索引和索引选择性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-3-%E5%A4%9A%E5%88%97%E7%B4%A2%E5%BC%95"><span class="nav-number">1.3.3.</span> <span class="nav-text">5.3.3 多列索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-4-%E9%80%89%E6%8B%A9%E5%90%88%E9%80%82%E7%9A%84%E7%B4%A2%E5%BC%95%E5%88%97%E9%A1%BA%E5%BA%8F"><span class="nav-number">1.3.4.</span> <span class="nav-text">5.3.4 选择合适的索引列顺序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-5-%E8%81%9A%E7%B0%87%E7%B4%A2%E5%BC%95"><span class="nav-number">1.3.5.</span> <span class="nav-text">5.3.5 聚簇索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-6-%E8%A6%86%E7%9B%96%E7%B4%A2%E5%BC%95"><span class="nav-number">1.3.6.</span> <span class="nav-text">5.3.6 覆盖索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-7-%E4%BD%BF%E7%94%A8%E7%B4%A2%E5%BC%95%E6%89%AB%E6%8F%8F%E6%9D%A5%E5%81%9A%E6%8E%92%E5%BA%8F"><span class="nav-number">1.3.7.</span> <span class="nav-text">5.3.7 使用索引扫描来做排序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-8-%E5%8E%8B%E7%BC%A9-%E5%89%8D%E7%BC%80%E5%8E%8B%E7%BC%A9-%E7%B4%A2%E5%BC%95"><span class="nav-number">1.3.8.</span> <span class="nav-text">5.3.8 压缩(前缀压缩)索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-9-%E5%86%97%E4%BD%99%E5%92%8C%E9%87%8D%E5%A4%8D%E7%B4%A2%E5%BC%95"><span class="nav-number">1.3.9.</span> <span class="nav-text">5.3.9 冗余和重复索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-10-%E6%9C%AA%E4%BD%BF%E7%94%A8%E7%9A%84%E7%B4%A2%E5%BC%95"><span class="nav-number">1.3.10.</span> <span class="nav-text">5.3.10 未使用的索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-11-%E7%B4%A2%E5%BC%95%E5%92%8C%E9%94%81"><span class="nav-number">1.3.11.</span> <span class="nav-text">5.3.11 索引和锁</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-5-%E7%BB%B4%E6%8A%A4%E7%B4%A2%E5%BC%95%E5%92%8C%E8%A1%A8"><span class="nav-number">1.4.</span> <span class="nav-text">5.5 维护索引和表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-5-1-%E6%89%BE%E5%88%B0%E5%B9%B6%E4%BF%AE%E5%A4%8D%E6%8D%9F%E5%9D%8F%E7%9A%84%E8%A1%A8-corruption"><span class="nav-number">1.4.1.</span> <span class="nav-text">5.5.1 找到并修复损坏的表(corruption)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-5-2-%E6%9B%B4%E6%96%B0%E7%B4%A2%E5%BC%95%E7%BB%9F%E8%AE%A1%E4%BF%A1%E6%81%AF"><span class="nav-number">1.4.2.</span> <span class="nav-text">5.5.2 更新索引统计信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-5-3-%E5%87%8F%E5%B0%91%E7%B4%A2%E5%BC%95%E5%92%8C%E6%95%B0%E6%8D%AE%E7%9A%84%E7%A2%8E%E7%89%87"><span class="nav-number">1.4.3.</span> <span class="nav-text">5.5.3 减少索引和数据的碎片</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-6-%E6%80%BB%E7%BB%93"><span class="nav-number">1.5.</span> <span class="nav-text">5.6 总结</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="妖小灰"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">妖小灰</p>
+  <div class="site-description" itemprop="description">(╯‵□′)╯︵┻━┻.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">38</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">44</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Sun2yKid/" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Sun2yKid&#x2F;" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.facebook.com/zhonghua00700/" title="Facebook → https:&#x2F;&#x2F;www.facebook.com&#x2F;zhonghua00700&#x2F;" rel="noopener" target="_blank"><i class="fab fa-facebook fa-fw"></i>Facebook</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/1751826157/" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1751826157&#x2F;" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://zhonghua00700.lofter.com/" title="Lofter → http:&#x2F;&#x2F;zhonghua00700.lofter.com&#x2F;" rel="noopener" target="_blank"><i class="fab fa-camera fa-fw"></i>Lofter</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://docs.sun2y.me/" title="https:&#x2F;&#x2F;docs.sun2y.me&#x2F;" rel="noopener" target="_blank">Reading Notes</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.jianshu.com/u/0c026eae82a2" title="https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;0c026eae82a2" rel="noopener" target="_blank">Jianshu</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://ncov.sun2y.me/" title="http:&#x2F;&#x2F;ncov.sun2y.me&#x2F;" rel="noopener" target="_blank">2019nCoV</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">妖小灰</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>
