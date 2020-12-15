@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Trebuchet MS:300,300italic,400,400italic,700,700italic|0.9:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"sun2y.me","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Linux&#x2F;UNIX系统编程手册 [德] Michael Kerrisk 第29章 线程：介绍第30章 线程：线程同步第31章 线程：线程安全和线程存储第32章 线程：线程取消第33章 线程：更多细节">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux&#x2F;UNIX系统编程手册-线程">
+<meta property="og:url" content="http://sun2y.me/2020/01/13/Liunx%20Unix%E7%B3%BB%E7%BB%9F%E7%BC%96%E7%A8%8B%E6%89%8B%E5%86%8C-%E7%BA%BF%E7%A8%8B/index.html">
+<meta property="og:site_name" content="妖小灰">
+<meta property="og:description" content="Linux&#x2F;UNIX系统编程手册 [德] Michael Kerrisk 第29章 线程：介绍第30章 线程：线程同步第31章 线程：线程安全和线程存储第32章 线程：线程取消第33章 线程：更多细节">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-01-13T03:11:11.000Z">
+<meta property="article:modified_time" content="2020-01-13T18:26:16.000Z">
+<meta property="article:author" content="妖小灰">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="笔记">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://sun2y.me/2020/01/13/Liunx%20Unix%E7%B3%BB%E7%BB%9F%E7%BC%96%E7%A8%8B%E6%89%8B%E5%86%8C-%E7%BA%BF%E7%A8%8B/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Linux/UNIX系统编程手册-线程 | 妖小灰</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-124173268-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-124173268-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?a5f08efba4fa4000554315eb2383dab4";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">妖小灰</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Never too late to learn.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://sun2y.me/2020/01/13/Liunx%20Unix%E7%B3%BB%E7%BB%9F%E7%BC%96%E7%A8%8B%E6%89%8B%E5%86%8C-%E7%BA%BF%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="妖小灰">
+      <meta itemprop="description" content="(╯‵□′)╯︵┻━┻.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="妖小灰">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Linux/UNIX系统编程手册-线程
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-01-13 11:11:11" itemprop="dateCreated datePublished" datetime="2020-01-13T11:11:11+08:00">2020-01-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-01-14 02:26:16" itemprop="dateModified" datetime="2020-01-14T02:26:16+08:00">2020-01-14</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0/%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index"><span itemprop="name">技术</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><a target="_blank" rel="noopener" href="https://book.douban.com/subject/25809330/">Linux/UNIX系统编程手册</a></p>
+<p>[德] Michael Kerrisk</p>
+<p>第29章 线程：介绍<br>第30章 线程：线程同步<br>第31章 线程：线程安全和线程存储<br>第32章 线程：线程取消<br>第33章 线程：更多细节</p>
+<a id="more"></a>
+
+<h2 id="线程-thread"><a href="#线程-thread" class="headerlink" title="线程(thread)"></a>线程(thread)</h2><p>与进程类似，线程是允许应用程序并发执行多个任务的一种机制。一个进程可以包含多个进程，同一程序中的所有线程均会独立执行相同程序，且共享同一份全局内存区域，其中包括初始化数据段(initialized data)、未初始化数据段(uninitialized data),以及堆内存段(heap segment)。<br>但每个进程都配有用来存放局部变量的私有栈。<br>同一进程中的线程还共享一些其他属性，包括进程ID、打开的文件描述符、信号处置、当前工作目录以及资源限制。</p>
+<p>同一进程中的多个线程可以并发执行。在多处理器情况下，多个线程可以同时并行。</p>
+<p>多进程实现并发时，例如web服务器的设计，通过fork()来创建子进程，同时为多个客户端提供服务。但是有以下限制：</p>
+<ul>
+<li>进程间的信息难以共享。由于除去只读代码段外，父子进程并未共享内存，因此需要采取进程间通讯方式交换信息</li>
+<li>通过fork()创建进程的代价相对较高，即使利用写时复制技术，仍然需要复制诸如内存页表(page table)、文件描述符表(file descriptor table)之类的多种进程属性。</li>
+</ul>
+<p>线程解决了上述问题：</p>
+<ul>
+<li>线程能方便的快速的共享信息。使用共享(全局或堆)变量即可，但要注意多线程数据安全问题。</li>
+<li>创建线程比创建进程快得多。在Linux中，是通过系统调用clone()来实现线程的，fork()创建时需要复制的诸多属性和页表，在线程间本来就是共享的，无需复制。</li>
+</ul>
+<h3 id="线程数据类型-Pthreads-data-type"><a href="#线程数据类型-Pthreads-data-type" class="headerlink" title="线程数据类型(Pthreads data type)"></a>线程数据类型(Pthreads data type)</h3><table>
+<thead>
+<tr>
+<th>数据类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>pthread_t</td>
+<td>线程ID</td>
+</tr>
+<tr>
+<td>pthread_mutex_t</td>
+<td>互斥对象(Mutex)</td>
+</tr>
+<tr>
+<td>pthread_mutexattr_t</td>
+<td>互斥属性对象</td>
+</tr>
+<tr>
+<td>pthread_cond_t</td>
+<td>条件变量(condition variable)</td>
+</tr>
+<tr>
+<td>pthread_condattr_t</td>
+<td>条件变量的属性对象</td>
+</tr>
+<tr>
+<td>pthread_key_t</td>
+<td>线程特有数据的键(key)</td>
+</tr>
+<tr>
+<td>pthread_once_t</td>
+<td>一次性初始化控制上下文(control context)</td>
+</tr>
+<tr>
+<td>prhread_attr_t</td>
+<td>线程的属性对象</td>
+</tr>
+</tbody></table>
+<p>多线程程序中，每个线程都有属于自己errno。</p>
+<p>Pthreads API 函数均以返回0表示成功，返回正值表示失败，与系统调用和库函数的不同，它们返回0表示成功，-1表示失败，并设置errno以表示错误原因。</p>
+<h3 id="创建线程"><a href="#创建线程" class="headerlink" title="创建线程"></a>创建线程</h3><p>程序启动时，产生的进程中只有单条线程，称之为初始(initial)或主(main)线程。<br>函数pthread_create()负责创建一条新线程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;pthread.h&gt;</span><br><span class="line">int pthread_create(pthread_t *thread, const pthread_attr_t *attr,</span><br><span class="line">void *(*start)(void *), void *arg);</span><br><span class="line">    Returns 0 on success, or a positive error number on error</span><br></pre></td></tr></table></figure>
+<p>新线程通过调用带有参数arg的函数start而开始执行。调用pthread_create()的线程会继续执行该调用之后的语句。</p>
+<h3 id="终止线程"><a href="#终止线程" class="headerlink" title="终止线程"></a>终止线程</h3><p>线程终止的方式如下：</p>
+<ul>
+<li>线程start函数执行return语句并返回指定值</li>
+<li>线程调用pthread_exit()</li>
+<li>调用pthread_cancle()取消线程</li>
+<li><strong>任意线程</strong>调用了exit(),或者主线程执行了return语句，都会导致进程中的<strong>所有线程</strong>立即终止。<br>pthread_exit()函数将终止调用线程，且其返回值可由另一线程通过调用pthread_join()来获取。<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;pthread.h&gt;</span><br><span class="line">void pthread_exit(void *retval)</span><br></pre></td></tr></table></figure>
+调用该函数相当于在线程的start函数中执行return，不同之处在于，可在线程start函数所调用的任意函数中调用pthread_exit()。<br>参数retval指定了线程的返回值。如果主线程调用该函数，而非调用exit()或者执行return语句，那么其他线程将继续运行。</li>
+</ul>
+<h3 id="线程ID-Thread-ID"><a href="#线程ID-Thread-ID" class="headerlink" title="线程ID(Thread ID)"></a>线程ID(Thread ID)</h3><p>进程内部的每个线程都有一个唯一标识，线程ID。线程ID会返回给pthread_create()的调用者，一个线程可以通过pthread_self()来获取自己的线程ID。</p>
+<p>函数pthread_equal()可以检查两个线程的ID是否相同。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;pthread.h&gt;</span><br><span class="line">int pthread_equal(pthread_t t1, pthread_t t2);</span><br><span class="line">    Returns nonzero value if t1 and t2 are equal, otherwise 0</span><br></pre></td></tr></table></figure>
+<h3 id="连接（joining）已终止的线程"><a href="#连接（joining）已终止的线程" class="headerlink" title="连接（joining）已终止的线程"></a>连接（joining）已终止的线程</h3><p>函数pthread_join()等待由thread标识的线程终止。这种操作被称为连接(joining)。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;pthread.h&gt;</span><br><span class="line">int pthread_join(pthread_t thread, void **retval);</span><br><span class="line">    Returns 0 on success, or a positive error number on error</span><br></pre></td></tr></table></figure>
+<p>默认情况下，线程是可连接的(joinable)，当线程退出时，其他线程可以通过调用pthread_join()获取其返回状态。</p>
+<h3 id="线程的分离-Detaching-a-thread"><a href="#线程的分离-Detaching-a-thread" class="headerlink" title="线程的分离(Detaching a thread)"></a>线程的分离(Detaching a thread)</h3><p>有时并不关心线程的返回状态，只是希望系统在线程终止时能够自动清理并移除。这时，可以调用pthread_detach()并向thread参数传入指定线程的标识符，将该线程标记为处于分离(detached)状态。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;pthread.h&gt;</span><br><span class="line">int pthread_detach(pthread_t thread);</span><br><span class="line">    Returns 0 on success, or a positive error number on error</span><br></pre></td></tr></table></figure>
+
+<p>一旦线程处于分离状态，就不能再使用pthread_join()来获取其状态，也无法使其重返“可连接”状态。</p>
+<p>使用pthread_detach(), 线程可以自行分离：</p>
+<blockquote>
+<p>pthread_detach(pthread_self())</p>
+</blockquote>
+<h2 id="线程：-线程同步"><a href="#线程：-线程同步" class="headerlink" title="线程： 线程同步"></a>线程： 线程同步</h2><h3 id="保护对共享变量的访问：互斥量-Protecting-Accesses-to-Shared-Variables-Mutexes"><a href="#保护对共享变量的访问：互斥量-Protecting-Accesses-to-Shared-Variables-Mutexes" class="headerlink" title="保护对共享变量的访问：互斥量(Protecting Accesses to Shared Variables: Mutexes)"></a>保护对共享变量的访问：互斥量(Protecting Accesses to Shared Variables: Mutexes)</h3><p>线程的主要优势在于，能够通过全局变量来共享信息。但必须保证多个线程不会同时修改同一个变量，或者某一线程不会读取正由其他线程修改的变量。<br>临界区(critical section)：指访问共享资源且执行原子(atomic)操作的代码片段。</p>
+<p>为避免线程更新共享变量时出现的问题，必须使用互斥量(mutex–mutual exclusion)来确保同时只有一个进程可以访问某项共享资源。<br>互斥量有两种状态：锁定(locked)和未锁定(unlocked), 任何时候，至多只有一个线程可以锁定该互斥量。一旦线程锁定互斥量，则只有该所有者才能给互斥量解锁。</p>
+<h4 id="静态分配的互斥量和动态初始化互斥量"><a href="#静态分配的互斥量和动态初始化互斥量" class="headerlink" title="静态分配的互斥量和动态初始化互斥量"></a>静态分配的互斥量和动态初始化互斥量</h4><p>互斥量是属于pthread_mutex_t类型的变量，在使用之前必须对其初始化。<br>对于静态分配的互斥量而言，将静态初始值PTHREAD_MUTEX_INITIIALIZER赋给互斥量：</p>
+<blockquote>
+<p>pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER</p>
+</blockquote>
+<p>静态初始值只能对如下互斥量初始化：经由静态分配且携带默认属性。<br>其他情况，比如：</p>
+<ul>
+<li>动态分配于堆中的互斥量</li>
+<li>互斥量时在栈中分配的automatic 变量</li>
+<li>初始化经由静态分配，且不使用默认属性的互斥量<br>必须调用pthread_mutex_init()对互斥量进行动态初始化。</li>
+</ul>
+<h4 id="加锁和解锁互斥量"><a href="#加锁和解锁互斥量" class="headerlink" title="加锁和解锁互斥量"></a>加锁和解锁互斥量</h4><p>初始化之后，互斥量处于未锁定状态。函数pthread_mutex_lock()可以锁定某一互斥量，函数pthread_mutex_unlock()则可以将一个互斥量解锁。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;pthread.h&gt;</span><br><span class="line">int pthread_mutex_lock(pthread_mutex_t *mutex);</span><br><span class="line">int pthread_mutex_unlock(pthread_mutex_t *mutex);</span><br><span class="line">    Both return 0 on success, or a positive error number on error</span><br></pre></td></tr></table></figure>
+
+<p>线程对互斥量的持有时间应该尽可能短，以避免妨碍其他线程的并发执行。</p>
+<h4 id="互斥量的死锁-mutex-deadlocks"><a href="#互斥量的死锁-mutex-deadlocks" class="headerlink" title="互斥量的死锁(mutex deadlocks)"></a>互斥量的死锁(mutex deadlocks)</h4><p>当一个线程需要同时访问两个或者更多不同的共享资源，而每个资源又都由不同的互斥量管理。当超过一个线程加锁同一组互斥量时，就可能发生死锁(deadlock)。<br>避免死锁的最简单方法是定义互斥量的层级关系。当多个线程对一组互斥量操作时，总是应该以相同顺序对该组互斥量进行锁定。</p>
+<h3 id="通知状态的改变：条件变量-Signaling-Changes-of-State-Condition-Variables"><a href="#通知状态的改变：条件变量-Signaling-Changes-of-State-Condition-Variables" class="headerlink" title="通知状态的改变：条件变量(Signaling Changes of State: Condition Variables)"></a>通知状态的改变：条件变量(Signaling Changes of State: Condition Variables)</h3><p>互斥量防止多个线程同时访问同一共享变量。条件变量允许一个线程就某个共享变量(或其他共享资源)的状态变化通知其他进程，并让其他线程等待这一通知。</p>
+<p>条件变量允许一个线程休眠(等待)直至接收到另一个线程的通知去执行某些操作。<br>条件变量总是结合互斥量使用。条件变量就共享变量的状态改变发出通知，而互斥量则提供对该共享变量访问的互斥(mutual exclusion)。</p>
+<h4 id="静态分配-动态分配的条件变量"><a href="#静态分配-动态分配的条件变量" class="headerlink" title="静态分配/动态分配的条件变量"></a>静态分配/动态分配的条件变量</h4><p>条件变量的数据类型是pthread_count_t，使用前也必须对其初始化。<br>对于静态分配的条件变量，将其赋值为PTHREAD_COND_INITALIZER即完成初始化操作。</p>
+<blockquote>
+<p>pthread_cont_t cond = PTHREAD_COND_INITIALIZER</p>
+</blockquote>
+<p>条件变量的主要操作是发送和等待通知。发送是指某个变量发生变化，向一个或多个处于等待的进程发送通知，而等待通知的线程在收到通知前一直处于阻塞状态。</p>
+<p>函数pthread_cond_signal()和pthread_cond_broadcast()均可针对由参数cond所指定的条件变量发送信号。pthread_cound_wait()函数将阻塞一线程，直至收到条件变量cond的通知。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;pthread.h&gt;</span><br><span class="line">int pthread_cond_signal(pthread_cond_t *cond);</span><br><span class="line">int pthread_cond_broadcast(pthread_cond_t *cond);</span><br><span class="line">int pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex);</span><br><span class="line">    All return 0 on success, or a positive error number on error</span><br></pre></td></tr></table></figure>
+<p>类似于互斥量，动态分配条件变量，需要使用pthread_cond_init()函数，使用情况也相似：</p>
+<ul>
+<li>自动或动态分配的条件变量</li>
+<li>初始化经由静态分配，未采用默认属性的变量</li>
+</ul>
+<h2 id="线程：线程安全-thread-safety-and-pre-thread-storage"><a href="#线程：线程安全-thread-safety-and-pre-thread-storage" class="headerlink" title="线程：线程安全(thread safety and pre-thread storage)"></a>线程：线程安全(thread safety and pre-thread storage)</h2><p>若函数可同时供多个线程安全调用，则称之为线程安全函数；反之，如果函数不是线程安全的，则不能并发调用。</p>
+<p>实现线程安全有多种方式，如上所述的</p>
+<ul>
+<li>将函数与互斥量关联使用</li>
+<li>将共享变量与互斥量关联起来<br>而最有效的方式是使其可重入(make it reentrant)。</li>
+</ul>
+<blockquote>
+<p>可重入和不可重入(Reentrant and nonreentrant functions)：<br>如果同一个进程的多条线程可以同时安全地调用某一函数，那么该函数就是可重入的。否则是不可重入的。<br>例如： 更新全局变量或者静态数据结构的函数可能是不可重入的(只用到本地变量的函数肯定是可重入的)。</p>
+</blockquote>
+<p>可重入函数能不使用互斥量实现线程安全，要诀是避免对全局和静态变量的使用。需要返回给调用者的任何信息，抑或是需要在对函数的历次调用间加以维护的信息，都存储于由调用者分配的缓冲区内。</p>
+<h3 id="线程特有数据-Thread-Specific-Data"><a href="#线程特有数据-Thread-Specific-Data" class="headerlink" title="线程特有数据(Thread-Specific Data ???)"></a>线程特有数据(Thread-Specific Data ???)</h3><p>实现函数的可重入，需要修改函数的接口。而使用线程特有数据技术，可以无需修改函数接口而实现已有函数的线程安全。线程特有数据使函数得以为每个调用线程分别维护一份变量副本。</p>
+<blockquote>
+<p>Thread-specific<br>data is persistent; each thread’s variable continues to exist between the thread’s<br>invocations of the function. This allows the function to maintain per-thread information<br>between calls to the function, and allows the function to pass distinct result<br>buffers (if required) to each calling thread.</p>
+</blockquote>
+<h3 id="线程局部存储-Thread-Local-Storage"><a href="#线程局部存储-Thread-Local-Storage" class="headerlink" title="线程局部存储(Thread-Local Storage)"></a>线程局部存储(Thread-Local Storage)</h3><p>类似于线程特有数据，线程局部存储也允许函数分配持久的基于线程的存储。其相比之下的优点是使用简单，创建线程局部变量，只需在全局或者静态变量的声明中包含__thread即可。</p>
+<blockquote>
+<p>static __thread buf[MAX_ERROR_LEN]</p>
+</blockquote>
+<h2 id="线程取消"><a href="#线程取消" class="headerlink" title="线程取消"></a>线程取消</h2><p>通常情况下，程序中的多个线程会并发执行，每个线程各司其职，直至其决议退出，随即会调用函数pthread_exit()或者从线程启动函数中返回。有时，需要将一个线程取消(cancel), 即向线程发送退出请求。</p>
+<h3 id="取消线程函数"><a href="#取消线程函数" class="headerlink" title="取消线程函数"></a>取消线程函数</h3><p>函数pthread_cancel()向thread之地那个的线程发送一个取消请求</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;pthread.h&gt;</span><br><span class="line">int pthread_cancel(pthread_t thread);</span><br><span class="line">    Returns 0 on success, or a positive error number on error</span><br></pre></td></tr></table></figure>
+<p>发出取消请求后，函数pthread_cancel()当即返回，不会等待目标进程的退出。</p>
+<h3 id="取消状态及类型"><a href="#取消状态及类型" class="headerlink" title="取消状态及类型"></a>取消状态及类型</h3><p>函数pthread_setcancelstate()和pthread_setcanceltype()会设置标志，允许线程对取消请求的响应过程加以控制。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;pthread.h&gt;</span><br><span class="line">int pthread_setcancelstate(int state, int *oldstate);</span><br><span class="line">int pthread_setcanceltype(int type, int *oldtype);</span><br><span class="line">    Both return 0 on success, or a positive error number on error</span><br></pre></td></tr></table></figure>
+<p>state参数： [PTHREAD_CANCEL_DISABLE, PTHREAD_CANCEL_ENABLE] , 即禁用和启用<code>被取消</code>功能</p>
+<p>type参数： [PTHREAD_CANCEL_ASYNCHRONOUS, PTHREAD_CANCEL_DEFERED], 即异步和延迟取消</p>
+<h3 id="取消点"><a href="#取消点" class="headerlink" title="取消点"></a>取消点</h3><p>当线程的取消状态和类型分别为启用和延迟时，仅当线程抵达某个取消点(cancellation point)时，取消请求才会起作用。SUSv3规定了一系列必须为取消点的函数。其中大部分函数都有能力将线程无限期地阻塞。</p>
+<p>函数pthread_testcancel()可以用来作为一个不含取消点线程的取消点来响应取消请求。</p>
+<h3 id="清理函数-cleanup-handler"><a href="#清理函数-cleanup-handler" class="headerlink" title="清理函数(cleanup handler)"></a>清理函数(cleanup handler)</h3><p>线程可以设置一个或多个清理函数，当线程遭到取消时会自动运行这些函数。</p>
+<p>函数pthread_cleanup_push()和pthread_cleanup_pop()分别负责向调用线程的清理函数栈添加和移除清理函数。</p>
+<h2 id="更多细节"><a href="#更多细节" class="headerlink" title="更多细节"></a>更多细节</h2><h3 id="线程栈"><a href="#线程栈" class="headerlink" title="线程栈"></a>线程栈</h3><p>创建线程时，每个线程都有一个属于自己的线程栈，且大小固定。可通过线程属性对象创建线程时，调用相关函数(pthread_attr_setstack()等)来设置线程栈的大小和位置。</p>
+<h3 id="线程和信号"><a href="#线程和信号" class="headerlink" title="线程和信号"></a>线程和信号</h3><p>UNIX信号模型是基于进程模型设计的，信号于线程之间存在明显的冲突。在设计多线程应用程序时应尽量避免使用信号。<br>为实现信号与线程间交互，多线程模型提供处理信号的各种有效函数。</p>
+<h3 id="线程实现模型"><a href="#线程实现模型" class="headerlink" title="线程实现模型"></a>线程实现模型</h3><blockquote>
+<p>内核调度实体(KSE, Kernel Scheduling Entity)：是内核分配CPU以及其他系统资源的单位。</p>
+</blockquote>
+<p>实现线程API有3种不同的模型，差异主要集中在线程如何与KSE相映射：</p>
+<ul>
+<li><p>多对一(M:1): 用户级线程，关乎线程创建、调度、同步均由进程内用户空间的线程库来处理，内核一无所知。优点在于，因为无需切换内核模式，速度很快。缺点是当线程发起系统调用时，所有线程都被阻塞；无法充分利用多处理器。</p>
+</li>
+<li><p>一对一(1:1): 内核级线程，每一个线程映射一个单独的KSE。内核对每个线程做调度，线程同步操作通过内核调用实现。M:1的弊端消除了，性能主要在于切换内核模式的开销以及线程的调度给内核调度器造成的负担。</p>
+</li>
+<li><p>多对多(M:N): 两级模型。综合以上两者的优点，但是过于复杂。</p>
+</li>
+</ul>
+<h3 id="Linux-POSIX线程的实现"><a href="#Linux-POSIX线程的实现" class="headerlink" title="Linux POSIX线程的实现"></a>Linux POSIX线程的实现</h3><p>针对Pthreads API, Linux有两种实现，LinuxThread和NPTL，均采用1：1模型。</p>
+<blockquote>
+<p>NPTL—Native POSIX Thread Library（NPTL）是Linux内核中实践POSIX Threads标准的库。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>Coffee? ☕</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/uploads/wechat-reward-image.png" alt="妖小灰 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/uploads/alipay-reward-image.png" alt="妖小灰 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/Linux/" rel="tag"><i class="fa fa-tag"></i> Linux</a>
+              <a href="/tags/%E7%AC%94%E8%AE%B0/" rel="tag"><i class="fa fa-tag"></i> 笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/01/11/Linux%20UNIX%E7%B3%BB%E7%BB%9F%E7%BC%96%E7%A8%8B%E6%89%8B%E5%86%8C-%E4%BF%A1%E5%8F%B7/" rel="prev" title="Linux/UNIX系统编程手册-信号">
+      <i class="fa fa-chevron-left"></i> Linux/UNIX系统编程手册-信号
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/01/15/Liunx%20Unix%E7%B3%BB%E7%BB%9F%E7%BC%96%E7%A8%8B%E6%89%8B%E5%86%8C-SOCKET/" rel="next" title="Liunx Unix系统编程手册-SOCKET">
+      Liunx Unix系统编程手册-SOCKET <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8zMTk1MS84NTE1"></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B-thread"><span class="nav-number">1.</span> <span class="nav-text">线程(thread)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B-Pthreads-data-type"><span class="nav-number">1.1.</span> <span class="nav-text">线程数据类型(Pthreads data type)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E7%BA%BF%E7%A8%8B"><span class="nav-number">1.2.</span> <span class="nav-text">创建线程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%88%E6%AD%A2%E7%BA%BF%E7%A8%8B"><span class="nav-number">1.3.</span> <span class="nav-text">终止线程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8BID-Thread-ID"><span class="nav-number">1.4.</span> <span class="nav-text">线程ID(Thread ID)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9E%E6%8E%A5%EF%BC%88joining%EF%BC%89%E5%B7%B2%E7%BB%88%E6%AD%A2%E7%9A%84%E7%BA%BF%E7%A8%8B"><span class="nav-number">1.5.</span> <span class="nav-text">连接（joining）已终止的线程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%88%86%E7%A6%BB-Detaching-a-thread"><span class="nav-number">1.6.</span> <span class="nav-text">线程的分离(Detaching a thread)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%EF%BC%9A-%E7%BA%BF%E7%A8%8B%E5%90%8C%E6%AD%A5"><span class="nav-number">2.</span> <span class="nav-text">线程： 线程同步</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%9D%E6%8A%A4%E5%AF%B9%E5%85%B1%E4%BA%AB%E5%8F%98%E9%87%8F%E7%9A%84%E8%AE%BF%E9%97%AE%EF%BC%9A%E4%BA%92%E6%96%A5%E9%87%8F-Protecting-Accesses-to-Shared-Variables-Mutexes"><span class="nav-number">2.1.</span> <span class="nav-text">保护对共享变量的访问：互斥量(Protecting Accesses to Shared Variables: Mutexes)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E5%88%86%E9%85%8D%E7%9A%84%E4%BA%92%E6%96%A5%E9%87%8F%E5%92%8C%E5%8A%A8%E6%80%81%E5%88%9D%E5%A7%8B%E5%8C%96%E4%BA%92%E6%96%A5%E9%87%8F"><span class="nav-number">2.1.1.</span> <span class="nav-text">静态分配的互斥量和动态初始化互斥量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A0%E9%94%81%E5%92%8C%E8%A7%A3%E9%94%81%E4%BA%92%E6%96%A5%E9%87%8F"><span class="nav-number">2.1.2.</span> <span class="nav-text">加锁和解锁互斥量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%92%E6%96%A5%E9%87%8F%E7%9A%84%E6%AD%BB%E9%94%81-mutex-deadlocks"><span class="nav-number">2.1.3.</span> <span class="nav-text">互斥量的死锁(mutex deadlocks)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E7%9F%A5%E7%8A%B6%E6%80%81%E7%9A%84%E6%94%B9%E5%8F%98%EF%BC%9A%E6%9D%A1%E4%BB%B6%E5%8F%98%E9%87%8F-Signaling-Changes-of-State-Condition-Variables"><span class="nav-number">2.2.</span> <span class="nav-text">通知状态的改变：条件变量(Signaling Changes of State: Condition Variables)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E5%88%86%E9%85%8D-%E5%8A%A8%E6%80%81%E5%88%86%E9%85%8D%E7%9A%84%E6%9D%A1%E4%BB%B6%E5%8F%98%E9%87%8F"><span class="nav-number">2.2.1.</span> <span class="nav-text">静态分配&#x2F;动态分配的条件变量</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%EF%BC%9A%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8-thread-safety-and-pre-thread-storage"><span class="nav-number">3.</span> <span class="nav-text">线程：线程安全(thread safety and pre-thread storage)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E7%89%B9%E6%9C%89%E6%95%B0%E6%8D%AE-Thread-Specific-Data"><span class="nav-number">3.1.</span> <span class="nav-text">线程特有数据(Thread-Specific Data ???)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E5%B1%80%E9%83%A8%E5%AD%98%E5%82%A8-Thread-Local-Storage"><span class="nav-number">3.2.</span> <span class="nav-text">线程局部存储(Thread-Local Storage)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E5%8F%96%E6%B6%88"><span class="nav-number">4.</span> <span class="nav-text">线程取消</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%96%E6%B6%88%E7%BA%BF%E7%A8%8B%E5%87%BD%E6%95%B0"><span class="nav-number">4.1.</span> <span class="nav-text">取消线程函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%96%E6%B6%88%E7%8A%B6%E6%80%81%E5%8F%8A%E7%B1%BB%E5%9E%8B"><span class="nav-number">4.2.</span> <span class="nav-text">取消状态及类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%96%E6%B6%88%E7%82%B9"><span class="nav-number">4.3.</span> <span class="nav-text">取消点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%85%E7%90%86%E5%87%BD%E6%95%B0-cleanup-handler"><span class="nav-number">4.4.</span> <span class="nav-text">清理函数(cleanup handler)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9B%B4%E5%A4%9A%E7%BB%86%E8%8A%82"><span class="nav-number">5.</span> <span class="nav-text">更多细节</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E6%A0%88"><span class="nav-number">5.1.</span> <span class="nav-text">线程栈</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E5%92%8C%E4%BF%A1%E5%8F%B7"><span class="nav-number">5.2.</span> <span class="nav-text">线程和信号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E6%A8%A1%E5%9E%8B"><span class="nav-number">5.3.</span> <span class="nav-text">线程实现模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Linux-POSIX%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">5.4.</span> <span class="nav-text">Linux POSIX线程的实现</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="妖小灰"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">妖小灰</p>
+  <div class="site-description" itemprop="description">(╯‵□′)╯︵┻━┻.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">38</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">44</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Sun2yKid/" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Sun2yKid&#x2F;" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.facebook.com/zhonghua00700/" title="Facebook → https:&#x2F;&#x2F;www.facebook.com&#x2F;zhonghua00700&#x2F;" rel="noopener" target="_blank"><i class="fab fa-facebook fa-fw"></i>Facebook</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/1751826157/" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1751826157&#x2F;" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://zhonghua00700.lofter.com/" title="Lofter → http:&#x2F;&#x2F;zhonghua00700.lofter.com&#x2F;" rel="noopener" target="_blank"><i class="fab fa-camera fa-fw"></i>Lofter</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://docs.sun2y.me/" title="https:&#x2F;&#x2F;docs.sun2y.me&#x2F;" rel="noopener" target="_blank">Reading Notes</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.jianshu.com/u/0c026eae82a2" title="https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;0c026eae82a2" rel="noopener" target="_blank">Jianshu</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://ncov.sun2y.me/" title="http:&#x2F;&#x2F;ncov.sun2y.me&#x2F;" rel="noopener" target="_blank">2019nCoV</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">妖小灰</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

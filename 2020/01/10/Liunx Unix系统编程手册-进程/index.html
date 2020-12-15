@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Trebuchet MS:300,300italic,400,400italic,700,700italic|0.9:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"sun2y.me","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Linux&#x2F;UNIX系统编程手册 [德] Michael Kerrisk 第6章 进程第24章 进程的创建第25章 进程的终止第26章 监控子进程第27章 程序的执行">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux&#x2F;UNIX系统编程手册-进程">
+<meta property="og:url" content="http://sun2y.me/2020/01/10/Liunx%20Unix%E7%B3%BB%E7%BB%9F%E7%BC%96%E7%A8%8B%E6%89%8B%E5%86%8C-%E8%BF%9B%E7%A8%8B/index.html">
+<meta property="og:site_name" content="妖小灰">
+<meta property="og:description" content="Linux&#x2F;UNIX系统编程手册 [德] Michael Kerrisk 第6章 进程第24章 进程的创建第25章 进程的终止第26章 监控子进程第27章 程序的执行">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-01-10T07:23:08.000Z">
+<meta property="article:modified_time" content="2020-01-13T06:34:44.000Z">
+<meta property="article:author" content="妖小灰">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="笔记">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://sun2y.me/2020/01/10/Liunx%20Unix%E7%B3%BB%E7%BB%9F%E7%BC%96%E7%A8%8B%E6%89%8B%E5%86%8C-%E8%BF%9B%E7%A8%8B/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Linux/UNIX系统编程手册-进程 | 妖小灰</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-124173268-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-124173268-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?a5f08efba4fa4000554315eb2383dab4";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">妖小灰</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Never too late to learn.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://sun2y.me/2020/01/10/Liunx%20Unix%E7%B3%BB%E7%BB%9F%E7%BC%96%E7%A8%8B%E6%89%8B%E5%86%8C-%E8%BF%9B%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="妖小灰">
+      <meta itemprop="description" content="(╯‵□′)╯︵┻━┻.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="妖小灰">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Linux/UNIX系统编程手册-进程
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-01-10 15:23:08" itemprop="dateCreated datePublished" datetime="2020-01-10T15:23:08+08:00">2020-01-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-01-13 14:34:44" itemprop="dateModified" datetime="2020-01-13T14:34:44+08:00">2020-01-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">笔记</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AC%94%E8%AE%B0/%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index"><span itemprop="name">技术</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><a target="_blank" rel="noopener" href="https://book.douban.com/subject/25809330/">Linux/UNIX系统编程手册</a></p>
+<p>[德] Michael Kerrisk</p>
+<p>第6章 进程<br>第24章 进程的创建<br>第25章 进程的终止<br>第26章 监控子进程<br>第27章 程序的执行</p>
+<a id="more"></a>
+<h2 id="进程"><a href="#进程" class="headerlink" title="进程"></a>进程</h2><h3 id="进程和程序-Processes-and-Programs"><a href="#进程和程序-Processes-and-Programs" class="headerlink" title="进程和程序(Processes and Programs)"></a>进程和程序(Processes and Programs)</h3><p>进程是一个可执行程序的实例(A process is an instance of an executing program).</p>
+<p>程序(program)是包含了一系列信息的文件，这些信息描述了如何在运行时创建一个进程，所包含的信息有：</p>
+<ul>
+<li>二进制格式标识(Binary format identification): 每个程序文件都包含用于描述可执行文件格式的元信息(metainformation)。内核利用此信息来解释文件中的其他信息。大多数UNIX(包括Linux)采用Executable<br>and Linking Format (ELF).</li>
+<li>机器语言指令(Machine-language instructions): 对程序算法进行编码</li>
+<li>程序入口地址(Program entry-point address)：标识程序开始执行时起始指令位置</li>
+<li>数据(Data): 变量初始值和程序使用的字面常量(literal constant)</li>
+<li>符号表及重定位表(Symbol and relocation tables): 描述程序中函数和变量的位置及名称。</li>
+<li>共享库和动态链接信息(Shared-library and dynamic-linking information): 程序运行需要的共享库，以及加载共享库的动态链接器的路径名</li>
+<li>其他信息: 描述如何创建进程</li>
+</ul>
+<p>可以用一个程序创建多个进程。</p>
+<p>进程是由内核定义的抽象的实体，并为该实体分配用以执行程序的各项系统资源。</p>
+<h3 id="进程号和父进程号"><a href="#进程号和父进程号" class="headerlink" title="进程号和父进程号"></a>进程号和父进程号</h3><p>进程号(PID)，是用来唯一标识系统中某个进程的一个整数。对系统调用来说，进程号可以作为参数传入，kill()系统调用；也可以作为返回值，比如getpid()系统调用。</p>
+<p>Linux内核限制进程号需要&lt;=32767, 可以调整。</p>
+<blockquote>
+<p>$ cat /proc/sys/kernel/pid_max<br>32768</p>
+</blockquote>
+<p>每个进程都有一个创建自己的父进程，使用系统调用getppid()获取父进程的进程号。</p>
+<p>使用<code>pstree</code>命令可以查看进程树。</p>
+<h3 id="进程内存布局-Memory-Layout-of-a-Process"><a href="#进程内存布局-Memory-Layout-of-a-Process" class="headerlink" title="进程内存布局(Memory Layout of a Process)"></a>进程内存布局(Memory Layout of a Process)</h3><p>每个进程所分配的内存由很多部分组成，通常称为“段(segments)”，或者“区(section)”:</p>
+<ul>
+<li>文本段(text segment): 包含进程运行的机器语言指令。文本段具有只读属性，同时可共享，使多个进程使用同一份程序代码拷贝。</li>
+<li>初始化的数据段(initialized data segment): 包含显示初始化的全局变量和静态变量。</li>
+<li>未初始化数据段(uninitialized data segment):也被称为BSS(block started by symbol)。 包含未进行显式初始化的全局变量和静态变量。程序启动之前系统将本段内所有内存初始化为0。</li>
+<li>栈(stack): 动态变化的segment，由栈帧(stack frames)组成。系统会为每个当前调用的函数分配一个栈帧，其中存储函数的局部变量，实参和返回值。</li>
+<li>堆(heap): 在运行时动态分配内存的区域。堆顶端被称为program break。</li>
+</ul>
+<p><code>size</code>命令可显示文本段，初始化和未初始化数据段(bss)的大小</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&gt; $ man size</span><br><span class="line">NAME</span><br><span class="line">       size - list section sizes and total size.</span><br><span class="line">...</span><br><span class="line">&gt; $ size hello</span><br><span class="line">   text	   data	    bss	    dec	    hex	filename</span><br><span class="line">   1230	    548	      4	   1782	    6f6	hello</span><br></pre></td></tr></table></figure>
+<h3 id="虚拟内存管理-Virtual-Memory-Management"><a href="#虚拟内存管理-Virtual-Memory-Management" class="headerlink" title="虚拟内存管理(Virtual Memory Management)"></a>虚拟内存管理(Virtual Memory Management)</h3><p>进程的内存布局存在与虚拟内存(Virtual Memory)中。虚拟内存的规划之一就是将每个程序使用的内存切割成小型的、固定大小的“页”(page)单元。相应地，将RAM换成一系列与“页”大小相同的页帧。</p>
+<p>为支持这一组织形式，内核为每个进程维护一张页表(page table)，用于记录每页在进程虚拟地址空间的位置。</p>
+<p>虚拟内存管理使进程的虚拟地址空间与RAM物理地址空间隔离开来。</p>
+<h3 id="栈和栈帧-the-stack-and-stack-frame"><a href="#栈和栈帧-the-stack-and-stack-frame" class="headerlink" title="栈和栈帧(the stack and stack frame)"></a>栈和栈帧(the stack and stack frame)</h3><p>函数的调用和返回使栈的增长和收缩呈线性。栈驻留在内存的高端比你高向下增长(朝堆的方向)。专用寄存器–栈指针(stack pointer)，用于跟踪当前栈顶。每次调用函数和返回函数时，都是在栈上新增和移去栈帧。</p>
+<p>栈帧(user stack), 一般指用户栈，区分与内核栈，包含一下信息：</p>
+<ul>
+<li>函数实参和局部变量</li>
+<li>(函数)调用的链接信息：每个函数都会用到一些CPU寄存器，比如程序计数器。比如调用另一个函数时，保存当前寄存器状态，以便返回时恢复。</li>
+</ul>
+<h3 id="命令行参数-command-line-argument-，argc-argv"><a href="#命令行参数-command-line-argument-，argc-argv" class="headerlink" title="命令行参数(command-line argument)，argc, argv"></a>命令行参数(command-line argument)，argc, argv</h3><ul>
+<li>int argc：命令行参数的个数</li>
+<li>char *argv[]: 指向命令行参数的指针数组，每一参数都是以空字符(‘\0’)结尾的字符串.</li>
+</ul>
+<p>程序可以通过/proc/PID/cmdline文件访问任一进程的命令行参数，每个参数都以空(NULL)字节终止。</p>
+<blockquote>
+<p>argv和environ(环境变量)数组，以及这些参数最初只想的字符串，都主流在进程栈上的一个单一、连续的内存区域。</p>
+</blockquote>
+<h2 id="进程的创建"><a href="#进程的创建" class="headerlink" title="进程的创建"></a>进程的创建</h2><h3 id="创建新进程：-fork-系统调用"><a href="#创建新进程：-fork-系统调用" class="headerlink" title="创建新进程： fork()系统调用"></a>创建新进程： fork()系统调用</h3><p>fork()创建一个新进程(child)，几近于对调用进程(parent)的翻版</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;unistd.h&gt;</span><br><span class="line">pid_t fork(void);</span><br><span class="line">In parent: returns process ID of child on success, or –1 on error;</span><br><span class="line">in successfully created child: always returns 0</span><br></pre></td></tr></table></figure>
+
+<p>完成对其调用后将存在两个进程，每个进程都会从fork()的返回处继续执行，程序代码可通过fork()的返回值来区分父子进程。在父进程中，fork()将返回新创建子进程的进程ID，在子进程中则返回0。<br>子进程也可调用getpid(), getppid()分别获得自身进程以及父进程的ID。</p>
+<p>执行fork()时候，子进程会获得父进程所有文件描述符的副本，也即父子进程共享打开的文件及其属性。</p>
+<p>从概念上讲，fork()认作对父进程程序代码段，数据段，堆栈的拷贝，实际上，子进程一般会替换代码段，并重新初始化数据，堆栈，全拷贝就造成了浪费。因此UNIX采用两种技术来避免这种浪费：</p>
+<ul>
+<li>内核将每一进程的代码段标记为只读，父子进程共享该代码段。</li>
+<li>对于数据段，堆栈中各页，内核采用写时复制技术(copy-on-write)。即内核会捕捉进程中针对页的修改企图，并为将要修改的页创建拷贝。</li>
+</ul>
+<h3 id="fork-之后的竞争条件-race-condition"><a href="#fork-之后的竞争条件-race-condition" class="headerlink" title="fork()之后的竞争条件(race condition)"></a>fork()之后的竞争条件(race condition)</h3><p>竞争表现在调用fork()后，无法确定父、子进程谁将率先访问CPU。Linux在版本升级中，多次调整默认优先的进程。<br>由于会产生所谓“竞争条件”的错误，不应对fork()之后执行父、子进程的特定顺序做任何假设。如若需要保证执行顺序，需要采用同步技术，包括信号量(semaphore)、文件锁(file lock)以及进程间经由管道(pipe)的消息发送。</p>
+<h2 id="进程的终止"><a href="#进程的终止" class="headerlink" title="进程的终止"></a>进程的终止</h2><h3 id="exit-和exit"><a href="#exit-和exit" class="headerlink" title="_exit()和exit()"></a>_exit()和exit()</h3><p>进程可能通过两种方式终止：</p>
+<ul>
+<li>异常(abnormal)终止：接受到终止信号(signal)，可能产生核心转储(core dump)</li>
+<li>进程使用系统调用_exit()自主终止<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;unistd.h&gt;</span><br><span class="line">void _exit(int status);</span><br></pre></td></tr></table></figure>
+_exit()的status参数定义了进程的终止状态，父进程可以调用wait()获取该状态。虽然定义为int类型，但仅有低8位可以被父进程使用。调用_exit()的程序总会成功终止，即使从不返回。</li>
+</ul>
+<p>一般使用库函数exit()来终止进程，它会在调用_exit()前执行各种动作：</p>
+<ul>
+<li>调用退出处理程序(通过atexit()和on_exit()注册的函数)</li>
+<li>刷新stdio流缓冲区</li>
+<li>使用由status提供的值执行_exit()系统调用</li>
+</ul>
+<h2 id="监控子进程"><a href="#监控子进程" class="headerlink" title="监控子进程"></a>监控子进程</h2><p>父进程需要了解其某个子进程何时改变了状态，用于监控子进程有两种方式：</p>
+<ul>
+<li>系统调用wait()</li>
+<li>信号SIGCHLD</li>
+</ul>
+<h3 id="等待子进程"><a href="#等待子进程" class="headerlink" title="等待子进程"></a>等待子进程</h3><h4 id="系统调用wait"><a href="#系统调用wait" class="headerlink" title="系统调用wait()"></a>系统调用wait()</h4><p>wait()等待进程的任一子进程终止，同时在参数status所指向的缓冲区中返回该子进程的终止状态</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;sys&#x2F;wait.h&gt;</span><br><span class="line">pid_t wait(int *status);</span><br><span class="line">    Returns process ID of terminated child, or –1 on error</span><br></pre></td></tr></table></figure>
+<p>wait()执行一下动作：</p>
+<ul>
+<li>如果调用之前还没有子进程终止，则一直阻塞，如果有，则立即返回</li>
+<li>如果status非空，那么关于子进程如何终止的信息则会通过status指向的整型变量返回</li>
+<li>内核将会为父进程下所有子进程的运行总量追加进程CPU时间以及资源使用数据</li>
+<li>将终止子进程的ID作为wait()的结果返回</li>
+</ul>
+<h4 id="系统调用waitpid"><a href="#系统调用waitpid" class="headerlink" title="系统调用waitpid()"></a>系统调用waitpid()</h4><p>wait()存在诸多限制，而waitpid()则意在突破这些限制</p>
+<ul>
+<li>无法指定某个特定的子进程，只能按循序等待下一个子进程终止</li>
+<li>没有进程退出，则wait()总是阻塞</li>
+<li>wait()只能发现终止的子进程，而对终止原因及恢复执行情况无能为力<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;sys&#x2F;wait.h&gt;</span><br><span class="line">pid_t waitpid(pid_t pid, int *status, int options);</span><br><span class="line">    Returns process ID of child, 0 (see text), or –1 on error</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h3 id="等待状态值"><a href="#等待状态值" class="headerlink" title="等待状态值"></a>等待状态值</h3><p>wait()和waitpid()返回的status值，可用来区分一下子进程事件：</p>
+<ul>
+<li>子进程调用_exit()或exit()而终止，并指定一个整型值作为退出状态</li>
+<li>子进程收到未处理信号终止</li>
+<li>子进程因为信号而暂停，并以WUNTRACED标志调用waitpid()</li>
+<li>子进程因收到信号SIGCONT而恢复，并以WCONTINUED标志调用waitpid()</li>
+</ul>
+<p>同时还有waitid(), wait3()和wait4()</p>
+<h3 id="孤儿进程和僵尸进程-Orphan-and-ZOmbie"><a href="#孤儿进程和僵尸进程-Orphan-and-ZOmbie" class="headerlink" title="孤儿进程和僵尸进程(Orphan and ZOmbie)"></a>孤儿进程和僵尸进程(Orphan and ZOmbie)</h3><ul>
+<li>孤儿进程：父进程先于子进程终止，此时init会接管该进程，对getppid()的调用将返回1</li>
+<li>僵尸进程，父进程在wait()之前，子进程就已终止，内核会将子进程转为僵尸进程，即释放资源，但是保留该进程在进程表里的一条记录，包含进程id，终止状态，资源使用数据等信息。</li>
+</ul>
+<p>父进程应执行wait()方法，以确保系统中总是能够清理那些死去的子进程。</p>
+<h3 id="SIGCHLD信号"><a href="#SIGCHLD信号" class="headerlink" title="SIGCHLD信号"></a>SIGCHLD信号</h3><p>无论一个子进程何时终止，系统都会向其父进程发送SIGCHLD信号。<br>对该信号的默认处理时将其忽略，可以通过设置信号处理程序signal()或sigaction()来捕获，同时编写信号处理函数使用wait()来处理僵尸进程。</p>
+<h2 id="程序的执行"><a href="#程序的执行" class="headerlink" title="程序的执行"></a>程序的执行</h2><h3 id="系统调用execve"><a href="#系统调用execve" class="headerlink" title="系统调用execve()"></a>系统调用execve()</h3><p>execve()可以将新程序加载到某一进程的内存空间，这一过程中，将丢弃旧有程序，而进程的栈、数据以及堆会被新程序的相应替换。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;unistd.h&gt;</span><br><span class="line">int execve(const char *pathname, char *const argv[], char *const envp[]);</span><br><span class="line">    Never returns on success; returns –1 on error</span><br></pre></td></tr></table></figure>
+<p><code>envp</code>参数指定了新环境的环境列表。<br>构建于execve()之上，有很多exec()类函数，功能相投，提供的接口不同。</p>
+<h3 id="执行shell命令：system"><a href="#执行shell命令：system" class="headerlink" title="执行shell命令：system()"></a>执行shell命令：system()</h3><p>程序可通过调用system()函数来执行任意的shell命令。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">int system(const char *command);</span><br><span class="line">See main text for a description of return value</span><br></pre></td></tr></table></figure>
+<p>函数system()创建一个子进程来运行shell，并以之执行命令command。<br>system()主要有点是简便：</p>
+<ul>
+<li>无需处理fork(), exec(), wait()和exit()的调用细节</li>
+<li>会代为处理错误和信号<br>但是效率变低，使用system()运行命令需要创建至少两个进程。一个用于运行shell，另外一个或多个则用于shell所执行的命令(执行每个命令都会调用一次exec())</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>Coffee? ☕</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/uploads/wechat-reward-image.png" alt="妖小灰 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/uploads/alipay-reward-image.png" alt="妖小灰 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/Linux/" rel="tag"><i class="fa fa-tag"></i> Linux</a>
+              <a href="/tags/%E7%AC%94%E8%AE%B0/" rel="tag"><i class="fa fa-tag"></i> 笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/01/10/Liunx%20Unix%E7%B3%BB%E7%BB%9F%E7%BC%96%E7%A8%8B%E6%89%8B%E5%86%8C-%E6%96%87%E4%BB%B6IO/" rel="prev" title="Linux/UNIX系统编程手册-文件IO">
+      <i class="fa fa-chevron-left"></i> Linux/UNIX系统编程手册-文件IO
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/01/11/Linux%20UNIX%E7%B3%BB%E7%BB%9F%E7%BC%96%E7%A8%8B%E6%89%8B%E5%86%8C-%E4%BF%A1%E5%8F%B7/" rel="next" title="Linux/UNIX系统编程手册-信号">
+      Linux/UNIX系统编程手册-信号 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8zMTk1MS84NTE1"></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">进程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E5%92%8C%E7%A8%8B%E5%BA%8F-Processes-and-Programs"><span class="nav-number">1.1.</span> <span class="nav-text">进程和程序(Processes and Programs)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E5%8F%B7%E5%92%8C%E7%88%B6%E8%BF%9B%E7%A8%8B%E5%8F%B7"><span class="nav-number">1.2.</span> <span class="nav-text">进程号和父进程号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E5%86%85%E5%AD%98%E5%B8%83%E5%B1%80-Memory-Layout-of-a-Process"><span class="nav-number">1.3.</span> <span class="nav-text">进程内存布局(Memory Layout of a Process)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86-Virtual-Memory-Management"><span class="nav-number">1.4.</span> <span class="nav-text">虚拟内存管理(Virtual Memory Management)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%88%E5%92%8C%E6%A0%88%E5%B8%A7-the-stack-and-stack-frame"><span class="nav-number">1.5.</span> <span class="nav-text">栈和栈帧(the stack and stack frame)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%8F%82%E6%95%B0-command-line-argument-%EF%BC%8Cargc-argv"><span class="nav-number">1.6.</span> <span class="nav-text">命令行参数(command-line argument)，argc, argv</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E7%9A%84%E5%88%9B%E5%BB%BA"><span class="nav-number">2.</span> <span class="nav-text">进程的创建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E6%96%B0%E8%BF%9B%E7%A8%8B%EF%BC%9A-fork-%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8"><span class="nav-number">2.1.</span> <span class="nav-text">创建新进程： fork()系统调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fork-%E4%B9%8B%E5%90%8E%E7%9A%84%E7%AB%9E%E4%BA%89%E6%9D%A1%E4%BB%B6-race-condition"><span class="nav-number">2.2.</span> <span class="nav-text">fork()之后的竞争条件(race condition)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E7%9A%84%E7%BB%88%E6%AD%A2"><span class="nav-number">3.</span> <span class="nav-text">进程的终止</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#exit-%E5%92%8Cexit"><span class="nav-number">3.1.</span> <span class="nav-text">_exit()和exit()</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%91%E6%8E%A7%E5%AD%90%E8%BF%9B%E7%A8%8B"><span class="nav-number">4.</span> <span class="nav-text">监控子进程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AD%89%E5%BE%85%E5%AD%90%E8%BF%9B%E7%A8%8B"><span class="nav-number">4.1.</span> <span class="nav-text">等待子进程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8wait"><span class="nav-number">4.1.1.</span> <span class="nav-text">系统调用wait()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8waitpid"><span class="nav-number">4.1.2.</span> <span class="nav-text">系统调用waitpid()</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AD%89%E5%BE%85%E7%8A%B6%E6%80%81%E5%80%BC"><span class="nav-number">4.2.</span> <span class="nav-text">等待状态值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%A4%E5%84%BF%E8%BF%9B%E7%A8%8B%E5%92%8C%E5%83%B5%E5%B0%B8%E8%BF%9B%E7%A8%8B-Orphan-and-ZOmbie"><span class="nav-number">4.3.</span> <span class="nav-text">孤儿进程和僵尸进程(Orphan and ZOmbie)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGCHLD%E4%BF%A1%E5%8F%B7"><span class="nav-number">4.4.</span> <span class="nav-text">SIGCHLD信号</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A8%8B%E5%BA%8F%E7%9A%84%E6%89%A7%E8%A1%8C"><span class="nav-number">5.</span> <span class="nav-text">程序的执行</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8execve"><span class="nav-number">5.1.</span> <span class="nav-text">系统调用execve()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%A7%E8%A1%8Cshell%E5%91%BD%E4%BB%A4%EF%BC%9Asystem"><span class="nav-number">5.2.</span> <span class="nav-text">执行shell命令：system()</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="妖小灰"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">妖小灰</p>
+  <div class="site-description" itemprop="description">(╯‵□′)╯︵┻━┻.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">38</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">44</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Sun2yKid/" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Sun2yKid&#x2F;" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.facebook.com/zhonghua00700/" title="Facebook → https:&#x2F;&#x2F;www.facebook.com&#x2F;zhonghua00700&#x2F;" rel="noopener" target="_blank"><i class="fab fa-facebook fa-fw"></i>Facebook</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/1751826157/" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1751826157&#x2F;" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://zhonghua00700.lofter.com/" title="Lofter → http:&#x2F;&#x2F;zhonghua00700.lofter.com&#x2F;" rel="noopener" target="_blank"><i class="fab fa-camera fa-fw"></i>Lofter</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://docs.sun2y.me/" title="https:&#x2F;&#x2F;docs.sun2y.me&#x2F;" rel="noopener" target="_blank">Reading Notes</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.jianshu.com/u/0c026eae82a2" title="https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;0c026eae82a2" rel="noopener" target="_blank">Jianshu</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://ncov.sun2y.me/" title="http:&#x2F;&#x2F;ncov.sun2y.me&#x2F;" rel="noopener" target="_blank">2019nCoV</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">妖小灰</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>
