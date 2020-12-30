@@ -20,18 +20,20 @@
     var CONFIG = {"hostname":"sun2y.me","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="(╯‵□′)╯︵┻━┻.">
-<meta property="og:type" content="website">
-<meta property="og:title" content="妖小灰">
-<meta property="og:url" content="http://sun2y.me/archives/page/3/index.html">
+  <meta name="description" content="Tmux github：tmux&#x2F;tmux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tmux 基本使用">
+<meta property="og:url" content="http://sun2y.me/2020/12/24/Tmux%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/index.html">
 <meta property="og:site_name" content="妖小灰">
-<meta property="og:description" content="(╯‵□′)╯︵┻━┻.">
+<meta property="og:description" content="Tmux github：tmux&#x2F;tmux">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-12-24T09:20:18.000Z">
+<meta property="article:modified_time" content="2020-12-30T09:03:09.842Z">
 <meta property="article:author" content="妖小灰">
-<meta property="article:tag" content="IT, blog">
+<meta property="article:tag" content="tutorial">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://sun2y.me/archives/page/3/">
+<link rel="canonical" href="http://sun2y.me/2020/12/24/Tmux%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/">
 
 
 <script id="page-configurations">
@@ -39,12 +41,12 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>归档 | 妖小灰</title>
+  <title>Tmux 基本使用 | 妖小灰</title>
   
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-124173268-1"></script>
     <script>
@@ -199,246 +201,144 @@
         <div class="content-wrap">
           
 
-          <div class="content archive">
+          <div class="content post posts-expand">
             
 
+    
   
   
-  
-  <div class="post-block">
-    <div class="posts-collapse">
-      <div class="collection-title">
-        
-        <span class="collection-header">还行! 目前共计 39 篇日志。 继续努力。</span>
-      </div>
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://sun2y.me/2020/12/24/Tmux%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="妖小灰">
+      <meta itemprop="description" content="(╯‵□′)╯︵┻━┻.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="妖小灰">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Tmux 基本使用
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-12-24 17:20:18" itemprop="dateCreated datePublished" datetime="2020-12-24T17:20:18+08:00">2020-12-24</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-12-30 17:03:09" itemprop="dateModified" datetime="2020-12-30T17:03:09+08:00">2020-12-30</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index"><span itemprop="name">技术</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-    <div class="collection-year">
-      <span class="collection-header">2019</span>
-    </div>
+        <p>Tmux github：<br><a target="_blank" rel="noopener" href="https://github.com/tmux/tmux">tmux/tmux</a></p>
+<a id="more"></a>
 
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+<h2 id="0-列出所有会话"><a href="#0-列出所有会话" class="headerlink" title="0. 列出所有会话"></a>0. 列出所有会话</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tmux ls</span><br></pre></td></tr></table></figure>
+<h2 id="1-新建会话"><a href="#1-新建会话" class="headerlink" title="1. 新建会话"></a>1. 新建会话</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tmux [new -s session-name]</span><br></pre></td></tr></table></figure>
+<h2 id="2-分离会话"><a href="#2-分离会话" class="headerlink" title="2. 分离会话"></a>2. 分离会话</h2><p>ctrl+b d</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tmux detach</span><br></pre></td></tr></table></figure>
 
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2019-10-10T20:06:52+08:00"
-              content="2019-10-10">
-          10-10
-        </time>
-      </div>
+<h2 id="3-接入会话"><a href="#3-接入会话" class="headerlink" title="3. 接入会话"></a>3. 接入会话</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tmux attach -t &lt;session-name&#x2F;num&gt;</span><br></pre></td></tr></table></figure>
 
-      <div class="post-title">
-          <a class="post-title-link" href="/2019/10/10/CentOS-%E5%AE%89%E8%A3%85-Python3/" itemprop="url">
-            <span itemprop="name">CentOS 安装 Python3</span>
-          </a>
-      </div>
+<h2 id="4-杀掉会话"><a href="#4-杀掉会话" class="headerlink" title="4. 杀掉会话"></a>4. 杀掉会话</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tmux kill-session -t &lt;session-name&#x2F;num&gt; </span><br></pre></td></tr></table></figure>
 
-    </header>
-  </article>
+<h2 id="5-切换会话"><a href="#5-切换会话" class="headerlink" title="5. 切换会话"></a>5. 切换会话</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tmux switch -t &lt;session-name&#x2F;num&gt;</span><br></pre></td></tr></table></figure>
 
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+<h2 id="6-重命名会话"><a href="#6-重命名会话" class="headerlink" title="6. 重命名会话"></a>6. 重命名会话</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tmux  rename-session -t &lt;session-name&#x2F;num&gt; new-name</span><br></pre></td></tr></table></figure>
 
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2019-08-23T16:17:07+08:00"
-              content="2019-08-23">
-          08-23
-        </time>
-      </div>
 
-      <div class="post-title">
-          <a class="post-title-link" href="/2019/08/23/Git%20%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" itemprop="url">
-            <span itemprop="name">Git常用命令</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2019-08-12T17:17:17+08:00"
-              content="2019-08-12">
-          08-12
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/2019/08/12/Linux%20%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" itemprop="url">
-            <span itemprop="name">Linux 常用命令</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-    <div class="collection-year">
-      <span class="collection-header">2018</span>
-    </div>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-12-25T17:47:40+08:00"
-              content="2018-12-25">
-          12-25
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/2018/12/25/Mac-%E5%BC%80%E5%8F%91%E8%BD%AF%E4%BB%B6%E5%AE%89%E8%A3%85/" itemprop="url">
-            <span itemprop="name">Mac 开发软件安装</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-    <div class="collection-year">
-      <span class="collection-header">2017</span>
-    </div>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2017-11-22T13:30:31+08:00"
-              content="2017-11-22">
-          11-22
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/2017/11/22/git%E4%BB%93%E5%BA%93%E7%9A%84%E6%90%AD%E5%BB%BA%E5%8F%8A%E4%BD%BF%E7%94%A8git%E5%AE%9E%E7%8E%B0%E4%BB%A3%E7%A0%81%E8%87%AA%E5%8A%A8%E9%83%A8%E7%BD%B2/" itemprop="url">
-            <span itemprop="name">git仓库的搭建和及使用git实现代码自动部署</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2017-11-21T13:30:31+08:00"
-              content="2017-11-21">
-          11-21
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/2017/11/21/PyCharm%E8%BF%9C%E7%AB%AF%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E7%9A%84%E6%90%AD%E5%BB%BA/" itemprop="url">
-            <span itemprop="name">PyCharm远端调试环境的搭建</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2017-07-07T15:36:02+08:00"
-              content="2017-07-07">
-          07-07
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/2017/07/07/Django-Tutorial---Writing-your-first-Django-app/" itemprop="url">
-            <span itemprop="name">Django Tutorial---Writing your first Django app</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2017-06-22T17:58:39+08:00"
-              content="2017-06-22">
-          06-22
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/2017/06/22/Does-tests-matter-when-coding/" itemprop="url">
-            <span itemprop="name">Does testing matter when coding?</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2017-05-23T19:29:59+08:00"
-              content="2017-05-23">
-          05-23
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/2017/05/23/stm32%E4%BD%BF%E7%94%A8cJSON%E5%BA%93%E5%AF%B9JSON%E6%A0%BC%E5%BC%8F%E7%9A%84%E6%89%93%E5%8C%85%E5%92%8C%E8%A7%A3%E6%9E%90/" itemprop="url">
-            <span itemprop="name">stm32使用cJSON库对JSON格式的打包和解析</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2017-05-12T16:17:07+08:00"
-              content="2017-05-12">
-          05-12
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/2017/05/12/Gor%E5%AE%89%E8%A3%85/" itemprop="url">
-            <span itemprop="name">Gor安装</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
 
 
     </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>Coffee? ☕</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/uploads/wechat-reward-image.png" alt="妖小灰 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/uploads/alipay-reward-image.png" alt="妖小灰 支付宝">
+        <p>支付宝</p>
+      </div>
+
   </div>
-  
-  
-  
+</div>
 
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/tutorial/" rel="tag"><i class="fa fa-tag"></i> tutorial</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/19/GO%20tutorial/" rel="prev" title="Go Tutorial">
+      <i class="fa fa-chevron-left"></i> Go Tutorial
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
   
-  <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/archives/page/2/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/archives/">1</a><a class="page-number" href="/archives/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/archives/page/4/">4</a><a class="extend next" rel="next" href="/archives/page/4/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
-  </nav>
+  
+  
 
 
 
           </div>
           
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8zMTk1MS84NTE1"></div>
+  </div>
+  
 
 <script>
   window.addEventListener('tabs:register', () => {
@@ -485,6 +385,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#0-%E5%88%97%E5%87%BA%E6%89%80%E6%9C%89%E4%BC%9A%E8%AF%9D"><span class="nav-number">1.</span> <span class="nav-text">0. 列出所有会话</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E6%96%B0%E5%BB%BA%E4%BC%9A%E8%AF%9D"><span class="nav-number">2.</span> <span class="nav-text">1. 新建会话</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%88%86%E7%A6%BB%E4%BC%9A%E8%AF%9D"><span class="nav-number">3.</span> <span class="nav-text">2. 分离会话</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E6%8E%A5%E5%85%A5%E4%BC%9A%E8%AF%9D"><span class="nav-number">4.</span> <span class="nav-text">3. 接入会话</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E6%9D%80%E6%8E%89%E4%BC%9A%E8%AF%9D"><span class="nav-number">5.</span> <span class="nav-text">4. 杀掉会话</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E5%88%87%E6%8D%A2%E4%BC%9A%E8%AF%9D"><span class="nav-number">6.</span> <span class="nav-text">5. 切换会话</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E9%87%8D%E5%91%BD%E5%90%8D%E4%BC%9A%E8%AF%9D"><span class="nav-number">7.</span> <span class="nav-text">6. 重命名会话</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -634,6 +535,21 @@
 
   
 
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
 
 </body>
 </html>
